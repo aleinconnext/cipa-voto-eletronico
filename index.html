@@ -2,19 +2,65 @@
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>cipa-voto-eletronico</title>
-    <meta name="description" content="Jurunense Code Team" />
-    <meta name="author" content="Lovable" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Urna Eletrônica CIPA - Jurunense</title>
+    <meta name="description" content="Sistema de Votação Eletrônica CIPA 2025 - Jurunense" />
+    <meta name="author" content="Jurunense Code Team" />
 
-    <meta property="og:title" content="cipa-voto-eletronico" />
-    <meta property="og:description" content="Jurunense Code Team" />
+    <!-- Meta tags para dispositivos móveis -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Urna CIPA" />
+    <meta name="application-name" content="Urna CIPA" />
+    <meta name="theme-color" content="#131D52" />
+    <meta name="msapplication-TileColor" content="#131D52" />
+    <meta name="msapplication-navbutton-color" content="#131D52" />
+
+    <!-- Prevenir zoom e scroll -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+
+    <!-- Meta tags para tela cheia -->
+    <meta name="full-screen" content="yes" />
+    <meta name="browsermode" content="application" />
+    <meta name="x5-orientation" content="landscape" />
+    <meta name="x5-fullscreen" content="true" />
+    <meta name="x5-page-mode" content="app" />
+
+    <meta property="og:title" content="Urna Eletrônica CIPA - Jurunense" />
+    <meta property="og:description" content="Sistema de Votação Eletrônica CIPA 2025 - Jurunense" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://ocs.jurunense.com/favicon.ico" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:site" content="@jurunense" />
     <meta name="twitter:image" content="https://ocs.jurunense.com/favicon.ico" />
+
+    <!-- Prevenir seleção de texto -->
+    <style>
+      * {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      /* Permitir seleção apenas em inputs */
+      input, textarea {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+      }
+      
+      /* Prevenir zoom em inputs no iOS */
+      input[type="text"], input[type="number"], input[type="password"] {
+        font-size: 16px;
+      }
+    </style>
   </head>
 
   <body>
