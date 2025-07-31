@@ -42,8 +42,8 @@ export const UrnaButton = ({
     number: "bg-white text-jurunense-primary border-2 border-jurunense-gray shadow-button hover:bg-gray-50 text-xl md:text-2xl w-12 h-12 md:w-16 md:h-16",
     white: "bg-white text-jurunense-primary border-2 border-jurunense-gray shadow-button hover:bg-gray-50 px-4 py-2 md:px-6 md:py-3 text-sm md:text-base",
     orange: "bg-jurunense-secondary text-white border-2 border-jurunense-secondary shadow-button hover:bg-jurunense-secondary/90 px-4 py-2 md:px-6 md:py-3 text-sm md:text-base",
-    confirm: "bg-jurunense-primary text-white border-2 border-jurunense-primary shadow-button hover:bg-jurunense-primary/90 px-6 py-3 md:px-8 md:py-4 text-base md:text-lg animate-pulse-button",
-    finalizar: "bg-jurunense-secondary text-white border-2 border-jurunense-secondary shadow-button hover:bg-jurunense-secondary/90 px-6 py-3 md:px-8 md:py-4 text-base md:text-lg animate-pulse-button"
+    confirm: "bg-jurunense-primary text-white border-2 border-jurunense-primary shadow-button hover:bg-jurunense-primary/90 px-6 py-3 md:px-8 md:py-4 text-base md:text-lg",
+    finalizar: "bg-jurunense-secondary text-white border-2 border-jurunense-secondary shadow-button hover:bg-jurunense-secondary/90 px-6 py-3 md:px-8 md:py-4 text-base md:text-lg"
   };
 
   return (

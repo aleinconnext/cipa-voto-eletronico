@@ -9,12 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { Calendar, Clock, Users, Vote, Settings, Plus, Edit, Trash2, Download, Eye, BarChart3, PieChart as PieChartIcon } from "lucide-react";
+import logoJurunense from "@/assets/logo-jurunense-desk.svg";
 
-// Mock data - em produção viria do Supabase
+// Mock data
 const mockResults = [
-  { candidate: 'MARIA SILVA SANTOS', number: '10', votes: 45, percentage: 42.5, department: 'Produção' },
-  { candidate: 'JOÃO CARLOS OLIVEIRA', number: '20', votes: 35, percentage: 33.0, department: 'Administração' },
-  { candidate: 'ANA PAULA FERREIRA', number: '30', votes: 26, percentage: 24.5, department: 'Qualidade' }
+  { number: '01', candidate: 'João Silva', department: 'Produção', votes: 45, percentage: 42.5 },
+  { number: '02', candidate: 'Maria Santos', department: 'Administração', votes: 38, percentage: 35.8 },
+  { number: '03', candidate: 'Pedro Costa', department: 'Qualidade', votes: 23, percentage: 21.7 }
 ];
 
 const mockStats = {
@@ -22,24 +23,21 @@ const mockStats = {
   votesCompleted: 106,
   votingProgress: 70.7,
   startTime: '08:00',
-  endTime: '17:00',
-  currentTime: '14:30',
-  activeSessions: 3,
-  totalCandidates: 5
+  endTime: '18:00',
+  activeSessions: 3
 };
 
-const mockSessions = [
-  { id: 1, name: 'Sessão Matutina', startTime: '08:00', endTime: '12:00', status: 'active', voters: 45 },
-  { id: 2, name: 'Sessão Vespertina', startTime: '13:00', endTime: '17:00', status: 'active', voters: 61 },
-  { id: 3, name: 'Sessão Noturna', startTime: '18:00', endTime: '22:00', status: 'pending', voters: 0 }
-];
-
 const mockCampaigns = [
-  { id: 1, name: 'Eleição CIPA 2025', status: 'active', startDate: '2025-01-15', endDate: '2025-01-20', totalVoters: 150 },
-  { id: 2, name: 'Eleição CIPA 2024', status: 'completed', startDate: '2024-01-10', endDate: '2024-01-15', totalVoters: 120 }
+  { id: '1', name: 'Eleição CIPA 2025', startDate: '01/01/2025', endDate: '31/01/2025', status: 'active', totalVoters: 150 },
+  { id: '2', name: 'Eleição CIPA 2024', startDate: '01/01/2024', endDate: '31/01/2024', status: 'completed', totalVoters: 120 }
 ];
 
-const COLORS = ['#131D52', '#FE3B1F', '#BDBDBD', '#4CAF50', '#FF9800'];
+const mockSessions = [
+  { id: '1', name: 'Sessão Matutina', startTime: '08:00', endTime: '12:00', status: 'active', voters: 45 },
+  { id: '2', name: 'Sessão Vespertina', startTime: '14:00', endTime: '18:00', status: 'active', voters: 61 }
+];
+
+const COLORS = ['#131D52', '#FE3B1F', '#BDBDBD', '#FF6B35', '#4ECDC4'];
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -62,9 +60,9 @@ export default function Admin() {
         <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <img 
-                src="https://jurunense.vtexassets.com/assets/vtex/assets-builder/jurunense.store-theme/1.0.28/images/logo-jurunense-desk___713cd0d073b349df05bcb4a4cd3afb54.svg"
-                alt="Jurunense Logo" 
+              <img
+                src={logoJurunense}
+                alt="Jurunense Logo"
                 className="w-32 h-24 object-contain"
               />
             </div>
@@ -104,9 +102,9 @@ export default function Admin() {
         <div className="mb-8">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
-              <img 
-                src="https://jurunense.vtexassets.com/assets/vtex/assets-builder/jurunense.store-theme/1.0.28/images/logo-jurunense-desk___713cd0d073b349df05bcb4a4cd3afb54.svg"
-                alt="Jurunense Logo" 
+              <img
+                src={logoJurunense}
+                alt="Jurunense Logo"
                 className="w-16 h-12 object-contain"
               />
               <div>
@@ -139,7 +137,7 @@ export default function Admin() {
               <p className="text-xs text-gray-600">Cadastrados no sistema</p>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-white border-jurunense-gray shadow-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-jurunense-primary flex items-center">
@@ -154,7 +152,7 @@ export default function Admin() {
               </p>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-white border-jurunense-gray shadow-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-jurunense-primary flex items-center">
@@ -171,7 +169,7 @@ export default function Admin() {
               </p>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-white border-jurunense-gray shadow-lg">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-jurunense-primary flex items-center">
@@ -225,13 +223,13 @@ export default function Admin() {
                         <span className="text-jurunense-secondary font-bold">{mockStats.votingProgress.toFixed(1)}%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-3">
-                        <div 
-                          className="bg-gradient-to-r from-jurunense-primary to-jurunense-secondary h-3 rounded-full transition-all duration-500" 
+                        <div
+                          className="bg-gradient-to-r from-jurunense-primary to-jurunense-secondary h-3 rounded-full transition-all duration-500"
                           style={{ width: `${mockStats.votingProgress}%` }}
                         ></div>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
                         <div className="text-2xl font-bold text-green-600">
