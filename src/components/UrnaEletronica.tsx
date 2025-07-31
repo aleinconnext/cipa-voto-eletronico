@@ -3,7 +3,7 @@ import { VoterValidation } from "./VoterValidation";
 import { VotingInterface } from "./VotingInterface";
 import { VoteSuccess } from "./VoteSuccess";
 import { VotingStep } from "@/types/voting";
-import logoJurunense from "@/assets/logo-jurunense-desk.svg";
+import logoJurunense from "@/assets/logo-jurunense-desk.svg?url";
 
 export const UrnaEletronica = () => {
   const [currentStep, setCurrentStep] = useState<VotingStep>('validation');

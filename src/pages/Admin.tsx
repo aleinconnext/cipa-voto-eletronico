@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { Calendar, Clock, Users, Vote, Settings, Plus, Edit, Trash2, Download, Eye, BarChart3, PieChart as PieChartIcon, Building2 } from "lucide-react";
-import logoJurunense from "@/assets/logo-jurunense-desk.svg";
+import logoJurunense from "@/assets/logo-jurunense-desk.svg?url";
 
 // Dados das filiais
 const filiais = [
