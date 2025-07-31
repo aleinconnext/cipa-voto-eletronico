@@ -127,25 +127,25 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-      <UrnaScreen>
-        <div className="text-center space-y-6">
-          <div className="border-b border-gray-600 pb-4">
-            <h1 className="text-2xl font-bold text-yellow-400">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-start max-w-7xl mx-auto">
+      <UrnaScreen className="min-h-[400px] md:min-h-[450px] max-h-[500px]">
+        <div className="text-center space-y-3 md:space-y-4">
+          <div className="border-b border-gray-600 pb-3">
+            <h1 className="text-lg md:text-xl font-bold text-yellow-400">
               ELEIÇÃO CIPA 2024
             </h1>
-            <p className="text-sm text-gray-300 mt-2">
+            <p className="text-sm text-gray-300 mt-1">
               Comissão Interna de Prevenção de Acidentes
             </p>
           </div>
 
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">
+          <div className="space-y-3">
+            <h2 className="text-base md:text-lg font-semibold">
               {currentField === 'cpf' ? 'Digite seu CPF:' : 'Digite sua data de nascimento:'}
             </h2>
             
-            <div className="bg-gray-800 p-4 rounded border-2 border-gray-600">
-              <div className="text-3xl font-mono tracking-wider">
+            <div className="bg-gray-800 p-3 rounded border-2 border-gray-600">
+              <div className="text-2xl md:text-3xl font-mono tracking-wider">
                 {currentField === 'cpf' ? (
                   <span className="text-green-400">
                     {cpf || '___.___.___-__'}
@@ -160,12 +160,12 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
             </div>
 
             {error && (
-              <div className="bg-red-900 border border-red-600 p-3 rounded">
-                <p className="text-red-300 font-semibold">{error}</p>
+              <div className="bg-red-900 border border-red-600 p-2 md:p-3 rounded">
+                <p className="text-red-300 font-semibold text-sm">{error}</p>
               </div>
             )}
 
-            <div className="text-sm text-gray-400 mt-4">
+            <div className="text-xs md:text-sm text-gray-400 mt-3">
               {currentField === 'cpf' ? (
                 <p>Digite apenas os números do seu CPF</p>
               ) : (

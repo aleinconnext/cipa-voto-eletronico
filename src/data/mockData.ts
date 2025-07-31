@@ -8,7 +8,7 @@ export const mockCandidates: Candidate[] = [
     name: 'MARIA SILVA SANTOS',
     position: 'Representante dos Funcionários',
     department: 'Produção',
-    photo: 'https://i.pravatar.cc/150?img=3'
+    photo: 'https://i.pravatar.cc/150?img=9'
   },
   {
     id: '2',
@@ -16,7 +16,7 @@ export const mockCandidates: Candidate[] = [
     name: 'JOÃO CARLOS OLIVEIRA',
     position: 'Representante dos Funcionários',
     department: 'Administração',
-    photo: 'https://i.pravatar.cc/150?img=2'
+    photo: 'https://i.pravatar.cc/150?u=fake@pravatar.com'
   },
   {
     id: '3',
@@ -24,7 +24,7 @@ export const mockCandidates: Candidate[] = [
     name: 'ANA PAULA FERREIRA',
     position: 'Representante dos Funcionários',
     department: 'Qualidade',
-    photo: 'https://i.pravatar.cc/150?img=3'
+    photo: 'https://i.pravatar.cc/150?img=10'
   },
   {
     id: '4',
@@ -32,7 +32,7 @@ export const mockCandidates: Candidate[] = [
     name: 'PEDRO HENRIQUE LIMA',
     position: 'Representante dos Funcionários',
     department: 'TI',
-    photo: 'https://i.pravatar.cc/150?img=4'
+    photo: 'https://i.pravatar.cc/150?img=8'
   },
   {
     id: '5',

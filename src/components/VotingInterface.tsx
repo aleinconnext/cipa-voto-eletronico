@@ -50,41 +50,38 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
     if (selectedCandidate && !showConfirmation) {
       setShowConfirmation(true);
       playConfirmSound();
-    } else if (showConfirmation) {
-      onVoteConfirm(candidateNumber);
     }
   };
 
   const handleFinalizar = () => {
     playFinalizarSound();
-    // Aqui você pode adicionar lógica para finalizar a votação
-    console.log('Finalizando votação...');
-    onBack(); // Volta para a tela inicial
+    // Registra o voto e vai para a tela de sucesso
+    onVoteConfirm(candidateNumber);
   };
 
   const canConfirm = candidateNumber.length === 2 && selectedCandidate;
 
   if (showConfirmation) {
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        <UrnaScreen>
-          <div className="text-center space-y-6">
-            <h1 className="text-2xl font-bold text-yellow-400">CONFIRME SEU VOTO</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-start max-w-7xl mx-auto">
+        <UrnaScreen className="min-h-[400px] md:min-h-[450px] max-h-[500px]">
+          <div className="text-center space-y-3 md:space-y-4">
+            <h1 className="text-lg md:text-xl font-bold text-yellow-400">CONFIRME SEU VOTO</h1>
             
-            <div className="bg-gray-800 p-6 rounded border-2 border-yellow-600">
-              <div className="flex items-center space-x-6">
+            <div className="bg-gray-800 p-3 md:p-4 rounded border-2 border-yellow-600">
+              <div className="flex flex-col md:flex-row items-center space-y-3 md:space-y-0 md:space-x-4">
                 {selectedCandidate?.photo && (
                   <img 
                     src={selectedCandidate.photo} 
                     alt={selectedCandidate.name}
-                    className="w-32 h-40 object-cover border-2 border-yellow-400 rounded"
+                    className="w-20 h-28 md:w-24 md:h-32 object-cover border-2 border-yellow-400 rounded"
                   />
                 )}
-                <div className="text-left">
-                  <div className="text-4xl font-bold text-green-400 mb-2">
+                <div className="text-center md:text-left">
+                  <div className="text-2xl md:text-3xl font-bold text-green-400 mb-1">
                     {selectedCandidate?.number}
                   </div>
-                  <div className="text-xl font-semibold text-white">
+                  <div className="text-base md:text-lg font-semibold text-white">
                     {selectedCandidate?.name}
                   </div>
                   <div className="text-sm text-gray-300">
@@ -97,48 +94,61 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
               </div>
             </div>
 
-            <div className="bg-yellow-900 border border-yellow-600 p-4 rounded animate-vote-confirm">
-              <p className="text-yellow-200 font-bold text-lg">
-                ATENÇÃO: Confirme seu voto pressionando CONFIRMA
+            <div className="bg-yellow-900 border border-yellow-600 p-2 md:p-3 rounded animate-vote-confirm">
+              <p className="text-yellow-200 font-bold text-sm md:text-base">
+                ATENÇÃO: Confirme seu voto pressionando FINALIZAR VOTAÇÃO
               </p>
-              <p className="text-yellow-300 text-sm mt-2">
+              <p className="text-yellow-300 text-xs md:text-sm mt-1">
                 Após confirmar, não será possível alterar seu voto
               </p>
             </div>
           </div>
         </UrnaScreen>
 
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center space-y-3 md:space-y-4">
           <UrnaKeypad
             onNumberClick={() => {}} // Disabled during confirmation
             onCorrect={handleCorrect}
-            onConfirm={handleConfirm}
+            onConfirm={() => {}} // Desabilitado na confirmação
+            confirmDisabled={true} // Sempre desabilitado
+            hideConfirmButton={true} // Esconde o botão CONFIRMA
+            hideActionButtons={true} // Esconde todos os botões de ação do keypad
           />
+          
+          {/* Botões lado a lado - apenas na tela de confirmação */}
+          <div className="flex justify-center space-x-3 md:space-x-4 mt-2 md:mt-4">
+            <UrnaButton variant="white" onClick={handleCorrect}>
+              CORRIGE
+            </UrnaButton>
+            <UrnaButton variant="finalizar" onClick={handleFinalizar}>
+              FINALIZAR VOTAÇÃO
+            </UrnaButton>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-      <UrnaScreen>
-        <div className="text-center space-y-6">
-          <div className="border-b border-gray-600 pb-4">
-            <h1 className="text-2xl font-bold text-yellow-400">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-start max-w-7xl mx-auto">
+      <UrnaScreen className="min-h-[400px] md:min-h-[450px] max-h-[500px]">
+        <div className="text-center space-y-3 md:space-y-4">
+          <div className="border-b border-gray-600 pb-3">
+            <h1 className="text-lg md:text-xl font-bold text-yellow-400">
               ELEIÇÃO CIPA 2024
             </h1>
-            <p className="text-sm text-gray-300 mt-2">
+            <p className="text-sm text-gray-300 mt-1">
               Representante dos Funcionários
             </p>
           </div>
 
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">
+          <div className="space-y-3">
+            <h2 className="text-base md:text-lg font-semibold">
               Digite o número do candidato:
             </h2>
             
-            <div className="bg-gray-800 p-4 rounded border-2 border-gray-600">
-              <div className="text-6xl font-mono font-bold tracking-wider">
+            <div className="bg-gray-800 p-3 rounded border-2 border-gray-600">
+              <div className="text-3xl md:text-4xl font-mono font-bold tracking-wider">
                 <span className="text-green-400">
                   {candidateNumber || '__'}
                 </span>
@@ -147,20 +157,20 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
             </div>
 
             {selectedCandidate ? (
-              <div className="bg-gray-800 p-6 rounded border-2 border-green-600">
-                <div className="flex items-center space-x-6">
+              <div className="bg-gray-800 p-3 md:p-4 rounded border-2 border-green-600">
+                <div className="flex flex-col md:flex-row items-center space-y-3 md:space-y-0 md:space-x-4">
                   {selectedCandidate.photo && (
                     <img 
                       src={selectedCandidate.photo} 
                       alt={selectedCandidate.name}
-                      className="w-28 h-36 object-cover border-2 border-green-400 rounded"
+                      className="w-16 h-24 md:w-20 md:h-28 object-cover border-2 border-green-400 rounded"
                     />
                   )}
-                  <div className="text-left">
-                    <div className="text-2xl font-bold text-green-400 mb-1">
+                  <div className="text-center md:text-left">
+                    <div className="text-lg md:text-xl font-bold text-green-400 mb-1">
                       {selectedCandidate.number}
                     </div>
-                    <div className="text-lg font-semibold text-white">
+                    <div className="text-sm md:text-base font-semibold text-white">
                       {selectedCandidate.name}
                     </div>
                     <div className="text-sm text-gray-300">
@@ -173,17 +183,17 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
                 </div>
               </div>
             ) : candidateNumber.length === 2 ? (
-              <div className="bg-red-900 border border-red-600 p-4 rounded">
-                <p className="text-red-300 font-semibold">
+              <div className="bg-red-900 border border-red-600 p-2 md:p-3 rounded">
+                <p className="text-red-300 font-semibold text-sm">
                   NÚMERO INVÁLIDO
                 </p>
-                <p className="text-red-400 text-sm">
+                <p className="text-red-400 text-xs md:text-sm">
                   Candidato não encontrado
                 </p>
               </div>
             ) : null}
 
-            <div className="text-sm text-gray-400 mt-4 space-y-1">
+            <div className="text-xs md:text-sm text-gray-400 mt-3 space-y-1">
               <p>• Digite 2 números para o candidato</p>
               <p>• Use CORRIGE para apagar</p>
               <p>• Use CONFIRMA para votar</p>
@@ -192,20 +202,13 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
         </div>
       </UrnaScreen>
 
-      <div className="flex flex-col items-center space-y-6">
+      <div className="flex justify-center">
         <UrnaKeypad
           onNumberClick={handleNumberClick}
           onCorrect={handleCorrect}
           onConfirm={handleConfirm}
           confirmDisabled={!canConfirm}
         />
-        
-        {/* Botão de Finalizar Votação */}
-        <div className="mt-8">
-          <UrnaButton variant="finalizar" onClick={handleFinalizar}>
-            FINALIZAR VOTAÇÃO
-          </UrnaButton>
-        </div>
       </div>
     </div>
   );

@@ -22,28 +22,28 @@ export const VoteSuccess = ({ onNewVoter }: VoteSuccessProps) => {
 
   return (
     <div className="flex justify-center">
-      <UrnaScreen className="max-w-2xl">
-        <div className="text-center space-y-8">
+      <UrnaScreen className="max-w-2xl mx-auto">
+        <div className="text-center space-y-6 md:space-y-8">
           <div className="animate-vote-confirm">
-            <div className="text-6xl mb-4">✅</div>
-            <h1 className="text-3xl font-bold text-green-400 mb-2">
+            <div className="text-4xl md:text-6xl mb-4">✅</div>
+            <h1 className="text-2xl md:text-3xl font-bold text-green-400 mb-2">
               VOTO REGISTRADO
             </h1>
-            <h2 className="text-xl text-green-300">
+            <h2 className="text-lg md:text-xl text-green-300">
               COM SUCESSO!
             </h2>
           </div>
 
-          <div className="bg-green-900 border border-green-600 p-6 rounded">
-            <p className="text-green-200 text-lg font-semibold mb-2">
+          <div className="bg-green-900 border border-green-600 p-4 md:p-6 rounded">
+            <p className="text-green-200 text-base md:text-lg font-semibold mb-2">
               Obrigado por participar da eleição da CIPA!
             </p>
-            <p className="text-green-300">
+            <p className="text-green-300 text-sm md:text-base">
               Seu voto foi registrado e será contabilizado na apuração final.
             </p>
           </div>
 
-          <div className="bg-gray-800 border border-gray-600 p-4 rounded">
+          <div className="bg-gray-800 border border-gray-600 p-3 md:p-4 rounded">
             <p className="text-yellow-400 font-semibold">
               IMPORTANTE:
             </p>
@@ -60,12 +60,6 @@ export const VoteSuccess = ({ onNewVoter }: VoteSuccessProps) => {
 
           <div className="text-gray-400 text-sm">
             <p>Retornando à tela inicial em alguns segundos...</p>
-            <button 
-              onClick={onNewVoter}
-              className="text-yellow-400 hover:text-yellow-300 underline mt-2"
-            >
-              Clique aqui para voltar agora
-            </button>
           </div>
         </div>
       </UrnaScreen>
