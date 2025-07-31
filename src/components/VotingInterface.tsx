@@ -1,47 +1,21 @@
 import { useState } from "react";
 import { UrnaScreen } from "./UrnaScreen";
 import { UrnaKeypad } from "./UrnaKeypad";
+import { UrnaButton } from "./UrnaButton";
 import { useUrnaAudio } from "@/hooks/useUrnaAudio";
 import { Candidate } from "@/types/voting";
+import { mockCandidates, findCandidateByNumber } from "@/data/mockData";
 
 interface VotingInterfaceProps {
   onVoteConfirm: (candidateNumber: string) => void;
   onBack: () => void;
 }
 
-// Mock data - em produção viria do Supabase
-const mockCandidates: Candidate[] = [
-  {
-    id: '1',
-    number: '10',
-    name: 'MARIA SILVA SANTOS',
-    position: 'Representante dos Funcionários',
-    department: 'Produção',
-    photo: 'https://images.unsplash.com/photo-1494790108755-2616b332c859?w=300'
-  },
-  {
-    id: '2',
-    number: '20',
-    name: 'JOÃO CARLOS OLIVEIRA',
-    position: 'Representante dos Funcionários',
-    department: 'Administração',
-    photo: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300'
-  },
-  {
-    id: '3',
-    number: '30',
-    name: 'ANA PAULA FERREIRA',
-    position: 'Representante dos Funcionários',
-    department: 'Qualidade',
-    photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300'
-  }
-];
-
 export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps) => {
   const [candidateNumber, setCandidateNumber] = useState('');
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const { playErrorSound, playConfirmSound } = useUrnaAudio();
+  const { playErrorSound, playConfirmSound, playFinalizarSound } = useUrnaAudio();
 
   const handleNumberClick = (number: string) => {
     if (candidateNumber.length < 2) {
@@ -50,7 +24,7 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
       
       // Se completou 2 dígitos, procura o candidato
       if (newNumber.length === 2) {
-        const candidate = mockCandidates.find(c => c.number === newNumber);
+        const candidate = findCandidateByNumber(newNumber);
         if (candidate) {
           setSelectedCandidate(candidate);
           playConfirmSound();
@@ -62,9 +36,14 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
   };
 
   const handleCorrect = () => {
-    setCandidateNumber('');
-    setSelectedCandidate(null);
-    setShowConfirmation(false);
+    // Se estiver na tela de confirmação, volta para a tela de votação
+    if (showConfirmation) {
+      setShowConfirmation(false);
+    } else {
+      // Se estiver na tela de votação, limpa o campo para nova pesquisa
+      setCandidateNumber('');
+      setSelectedCandidate(null);
+    }
   };
 
   const handleConfirm = () => {
@@ -74,6 +53,13 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
     } else if (showConfirmation) {
       onVoteConfirm(candidateNumber);
     }
+  };
+
+  const handleFinalizar = () => {
+    playFinalizarSound();
+    // Aqui você pode adicionar lógica para finalizar a votação
+    console.log('Finalizando votação...');
+    onBack(); // Volta para a tela inicial
   };
 
   const canConfirm = candidateNumber.length === 2 && selectedCandidate;
@@ -91,7 +77,7 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
                   <img 
                     src={selectedCandidate.photo} 
                     alt={selectedCandidate.name}
-                    className="w-24 h-24 rounded-full object-cover border-2 border-yellow-400"
+                    className="w-32 h-40 object-cover border-2 border-yellow-400 rounded"
                   />
                 )}
                 <div className="text-left">
@@ -167,7 +153,7 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
                     <img 
                       src={selectedCandidate.photo} 
                       alt={selectedCandidate.name}
-                      className="w-20 h-20 rounded-full object-cover border-2 border-green-400"
+                      className="w-28 h-36 object-cover border-2 border-green-400 rounded"
                     />
                   )}
                   <div className="text-left">
@@ -206,13 +192,20 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
         </div>
       </UrnaScreen>
 
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center space-y-6">
         <UrnaKeypad
           onNumberClick={handleNumberClick}
           onCorrect={handleCorrect}
           onConfirm={handleConfirm}
           confirmDisabled={!canConfirm}
         />
+        
+        {/* Botão de Finalizar Votação */}
+        <div className="mt-8">
+          <UrnaButton variant="finalizar" onClick={handleFinalizar}>
+            FINALIZAR VOTAÇÃO
+          </UrnaButton>
+        </div>
       </div>
     </div>
   );

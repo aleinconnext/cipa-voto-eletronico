@@ -8,8 +8,11 @@ export interface Candidate {
 }
 
 export interface Voter {
+  id: string;
   cpf: string;
+  name: string;
   birthDate: string;
+  department: string;
   hasVoted: boolean;
 }
 

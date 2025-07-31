@@ -2,6 +2,7 @@ import { useState } from "react";
 import { UrnaScreen } from "./UrnaScreen";
 import { UrnaKeypad } from "./UrnaKeypad";
 import { useUrnaAudio } from "@/hooks/useUrnaAudio";
+import { findVoterByCPF, validateCPF } from "@/data/mockData";
 
 interface VoterValidationProps {
   onValidationSuccess: (cpf: string, birthDate: string) => void;
@@ -26,30 +27,6 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
     const numbers = value.replace(/\D/g, '');
     // Aplica a máscara DD/MM/AAAA
     return numbers.replace(/(\d{2})(\d{2})(\d{4})/, '$1/$2/$3');
-  };
-
-  const validateCPF = (cpf: string) => {
-    const numbers = cpf.replace(/\D/g, '');
-    if (numbers.length !== 11) return false;
-    
-    // Algoritmo básico de validação do CPF
-    let sum = 0;
-    for (let i = 0; i < 9; i++) {
-      sum += parseInt(numbers.charAt(i)) * (10 - i);
-    }
-    let remainder = (sum * 10) % 11;
-    if (remainder === 10 || remainder === 11) remainder = 0;
-    if (remainder !== parseInt(numbers.charAt(9))) return false;
-
-    sum = 0;
-    for (let i = 0; i < 10; i++) {
-      sum += parseInt(numbers.charAt(i)) * (11 - i);
-    }
-    remainder = (sum * 10) % 11;
-    if (remainder === 10 || remainder === 11) remainder = 0;
-    if (remainder !== parseInt(numbers.charAt(10))) return false;
-
-    return true;
   };
 
   const validateDate = (date: string) => {
@@ -99,6 +76,21 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
         playErrorSound();
         return;
       }
+      
+      // Verifica se o eleitor existe nos dados mockados
+      const voter = findVoterByCPF(cpf);
+      if (!voter) {
+        setError('CPF não encontrado na lista de eleitores.');
+        playErrorSound();
+        return;
+      }
+      
+      if (voter.hasVoted) {
+        setError('Este eleitor já votou.');
+        playErrorSound();
+        return;
+      }
+      
       setCurrentField('birthDate');
       playConfirmSound();
     } else {
@@ -107,6 +99,20 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
         playErrorSound();
         return;
       }
+      
+      // Verifica se a data de nascimento confere
+      const voter = findVoterByCPF(cpf);
+      if (voter) {
+        const voterDate = new Date(voter.birthDate);
+        const inputDate = new Date(birthDate.split('/').reverse().join('-'));
+        
+        if (voterDate.getTime() !== inputDate.getTime()) {
+          setError('Data de nascimento não confere.');
+          playErrorSound();
+          return;
+        }
+      }
+      
       playConfirmSound();
       onValidationSuccess(cpf, birthDate);
     }

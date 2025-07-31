@@ -1,4 +1,6 @@
 import { useCallback } from 'react';
+import fimSound from '../assets/sons/fim.mp3';
+import interSound from '../assets/sons/inter.mp3';
 
 export const useUrnaAudio = () => {
   // Função para tocar arquivos de áudio
@@ -35,8 +37,13 @@ export const useUrnaAudio = () => {
   }, [createBeep]);
 
   const playConfirmSound = useCallback(() => {
-    // Som oficial do TSE para confirmação
-    playAudioFile('/sounds/confirma.mp3');
+    // Som para botão confirmar (inter.mp3)
+    playAudioFile(interSound, 0.8);
+  }, [playAudioFile]);
+
+  const playFinalizarSound = useCallback(() => {
+    // Som para botão finalizar votação (fim.mp3)
+    playAudioFile(fimSound, 0.8);
   }, [playAudioFile]);
 
   const playErrorSound = useCallback(() => {
@@ -46,13 +53,20 @@ export const useUrnaAudio = () => {
 
   const playSuccessSound = useCallback(() => {
     // Som oficial do TSE para finalização
-    playAudioFile('/sounds/fim.mp3');
+    playAudioFile(fimSound, 0.8);
+  }, [playAudioFile]);
+
+  const playInterSound = useCallback(() => {
+    // Som intermediário
+    playAudioFile(interSound, 0.7);
   }, [playAudioFile]);
 
   return {
     playKeySound,
     playConfirmSound,
+    playFinalizarSound,
     playErrorSound,
-    playSuccessSound
+    playSuccessSound,
+    playInterSound
   };
 };
