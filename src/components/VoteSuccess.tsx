@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { UrnaScreen } from "./UrnaScreen";
+import { UrnaKeypad } from "./UrnaKeypad";
 import { useUrnaAudio } from "@/hooks/useUrnaAudio";
 
 interface VoteSuccessProps {
@@ -20,49 +21,78 @@ export const VoteSuccess = ({ onNewVoter }: VoteSuccessProps) => {
     return () => clearTimeout(timer);
   }, [playSuccessSound, onNewVoter]);
 
+  // Obter data e hora atual
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR', { 
+    weekday: 'short', 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric' 
+  }).toUpperCase();
+  const timeStr = now.toLocaleTimeString('pt-BR', { 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit' 
+  });
+
   return (
-    <div className="flex justify-center">
-      <UrnaScreen className="max-w-2xl mx-auto">
-        <div className="text-center space-y-6 md:space-y-8">
-          <div className="animate-vote-confirm">
-            <div className="text-4xl md:text-6xl mb-4">✅</div>
-            <h1 className="text-2xl md:text-3xl font-bold text-green-400 mb-2">
-              VOTO REGISTRADO
-            </h1>
-            <h2 className="text-lg md:text-xl text-green-300">
-              COM SUCESSO!
-            </h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-start max-w-7xl mx-auto">
+      <UrnaScreen className="min-h-[400px] md:min-h-[450px] max-h-[500px]">
+        <div className="text-center space-y-3 md:space-y-4">
+          {/* Top Bar - Data, TREINAMENTO e Bateria */}
+          <div className="flex justify-between items-center text-sm text-gray-400 border-b border-gray-600 pb-2">
+            <div className="font-mono">
+              {dateStr} {timeStr}
+            </div>
+            <div className="text-yellow-400 font-semibold">
+              TREINAMENTO
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-6 h-3 bg-green-500 rounded-sm relative">
+                <div className="absolute inset-0.5 bg-green-400 rounded-sm"></div>
+              </div>
+              <span className="text-xs">⚡</span>
+            </div>
           </div>
 
-          <div className="bg-green-900 border border-green-600 p-4 md:p-6 rounded">
-            <p className="text-green-200 text-base md:text-lg font-semibold mb-2">
-              Obrigado por participar da eleição da CIPA!
-            </p>
-            <p className="text-green-300 text-sm md:text-base">
-              Seu voto foi registrado e será contabilizado na apuração final.
-            </p>
+          {/* Main Content */}
+          <div className="relative min-h-[200px] flex items-center justify-center">
+            {/* FIM Text */}
+            <div className="text-6xl md:text-8xl font-bold text-green-400 tracking-wider">
+              FIM
+            </div>
+            
+            {/* VOTOU Watermark */}
+            <div className="absolute bottom-4 right-4 text-2xl md:text-3xl font-bold text-gray-600 opacity-30">
+              VOTOU
+            </div>
           </div>
 
-          <div className="bg-gray-800 border border-gray-600 p-3 md:p-4 rounded">
-            <p className="text-yellow-400 font-semibold">
-              IMPORTANTE:
-            </p>
-            <p className="text-gray-300 text-sm mt-2">
-              • Guarde seu comprovante de votação
-            </p>
-            <p className="text-gray-300 text-sm">
-              • A apuração será realizada ao final do período eleitoral
-            </p>
-            <p className="text-gray-300 text-sm">
-              • Os resultados serão divulgados conforme cronograma
-            </p>
+          {/* Bottom Bar - Informações do município */}
+          <div className="border-t border-gray-600 pt-2">
+            <div className="text-xs text-gray-400 font-mono text-center">
+              Município: 99999 - Minha Cidade Zona: 9999 Seção: 9999
+            </div>
           </div>
 
+          {/* Mensagem de retorno */}
           <div className="text-gray-400 text-sm">
             <p>Retornando à tela inicial em alguns segundos...</p>
           </div>
         </div>
       </UrnaScreen>
+
+      {/* Teclado desabilitado */}
+      <div className="flex justify-center">
+        <UrnaKeypad
+          onNumberClick={() => {}} // Desabilitado
+          onCorrect={() => {}} // Desabilitado
+          onConfirm={() => {}} // Desabilitado
+          confirmDisabled={true} // Sempre desabilitado
+          hideConfirmButton={true} // Esconde o botão CONFIRMA
+          hideActionButtons={true} // Esconde todos os botões de ação
+        />
+      </div>
     </div>
   );
 };

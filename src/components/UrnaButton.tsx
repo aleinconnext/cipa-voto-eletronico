@@ -19,7 +19,7 @@ export const UrnaButton = ({
   const { playKeySound, playConfirmSound, playFinalizarSound } = useUrnaAudio();
 
   const handleClick = () => {
-    if (!disabled) {
+    if (!disabled && onClick) {
       // Tocar som específico baseado no tipo de botão
       switch (variant) {
         case 'confirm':
@@ -32,7 +32,7 @@ export const UrnaButton = ({
           playKeySound();
           break;
       }
-      onClick?.();
+      onClick();
     }
   };
 
