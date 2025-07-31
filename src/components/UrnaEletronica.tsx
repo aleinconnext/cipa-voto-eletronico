@@ -83,13 +83,13 @@ export const UrnaEletronica = () => {
           <div className="mt-6 text-center">
             <div className="bg-jurunense-primary rounded-lg p-3 inline-block">
               <p className="text-white text-sm font-semibold">
-                Urna Eletrônica Certificada • Justiça Eleitoral Jurunense
+                Justiça Eleitoral Jurunense
               </p>
             </div>
           </div>
         </div>
 
-        {/* Bottom Navigation */}
+        {/* Bottom Navigation 
         <div className="mt-8 text-center">
           <a
             href="/admin"
@@ -97,7 +97,7 @@ export const UrnaEletronica = () => {
           >
             Área Administrativa
           </a>
-        </div>
+        </div>*/}
       </div>
     </div>
   );
