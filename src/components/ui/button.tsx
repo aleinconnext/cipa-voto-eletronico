@@ -18,6 +18,8 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        urna: "bg-urna-button-white text-urna-button-white-foreground border-2 border-gray-300 shadow-button hover:bg-gray-50 font-bold",
+        urnaOrange: "bg-urna-button-orange text-urna-button-orange-foreground border-2 border-orange-600 shadow-button hover:bg-orange-500 font-bold",
       },
       size: {
         default: "h-10 px-4 py-2",

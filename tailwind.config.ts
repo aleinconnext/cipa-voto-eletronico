@@ -52,6 +52,16 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Urna specific colors
+				urna: {
+					screen: 'hsl(var(--urna-screen))',
+					'screen-foreground': 'hsl(var(--urna-screen-foreground))',
+					'button-white': 'hsl(var(--urna-button-white))',
+					'button-white-foreground': 'hsl(var(--urna-button-white-foreground))',
+					'button-orange': 'hsl(var(--urna-button-orange))',
+					'button-orange-foreground': 'hsl(var(--urna-button-orange-foreground))',
+					body: 'hsl(var(--urna-body))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -84,11 +94,39 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-button': {
+					'0%, 100%': {
+						boxShadow: '0 0 0 0 hsl(var(--primary) / 0.7)'
+					},
+					'50%': {
+						boxShadow: '0 0 0 10px hsl(var(--primary) / 0)'
+					}
+				},
+				'vote-confirm': {
+					'0%': { transform: 'scale(1)' },
+					'50%': { transform: 'scale(1.05)' },
+					'100%': { transform: 'scale(1)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-button': 'pulse-button 2s infinite',
+				'vote-confirm': 'vote-confirm 0.3s ease-out'
+			},
+			backgroundImage: {
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-secondary': 'var(--gradient-secondary)',
+				'gradient-urna': 'var(--gradient-urna)'
+			},
+			boxShadow: {
+				'urna': 'var(--shadow-urna)',
+				'screen': 'var(--shadow-screen)',
+				'button': 'var(--shadow-button)'
+			},
+			transitionTimingFunction: {
+				'urna': 'var(--transition-urna)'
 			}
 		}
 	},
