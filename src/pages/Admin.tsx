@@ -8,8 +8,149 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { Calendar, Clock, Users, Vote, Settings, Plus, Edit, Trash2, Download, Eye, BarChart3, PieChart as PieChartIcon } from "lucide-react";
+import { Calendar, Clock, Users, Vote, Settings, Plus, Edit, Trash2, Download, Eye, BarChart3, PieChart as PieChartIcon, Building2 } from "lucide-react";
 import logoJurunense from "@/assets/logo-jurunense-desk.svg";
+
+// Dados das filiais
+const filiais = [
+  {
+    id: 1,
+    nome: "JURUNENSE",
+    cnpj: "13.772.792/0001-64",
+    razaoSocial: "JURUNENSE HOME CENTER LTDA",
+    telefone: "(91) 3323-2900",
+    endereco: "AV CIPRIANO SANTOS, 434 - CANUDOS - BELEM/PA",
+    cep: "66070-000"
+  },
+  {
+    id: 2,
+    nome: "SEVEN TRANSPORTE",
+    cnpj: "10.902.984/0001-50",
+    razaoSocial: "SEVEN TRANSPORTE E LOGISTICA EIRELI",
+    telefone: "918443-5116",
+    endereco: "ROD BR 316, 4500 KM 3 - COQUEIRO - ANANINDEUA/PA",
+    cep: "67113-000"
+  },
+  {
+    id: 3,
+    nome: "ANDRADE BATISTA",
+    cnpj: "28.345.081/0001-80",
+    razaoSocial: "ANDRADE BATISTA CONSTRUTORA LTDA",
+    telefone: "(91) 8443-5116",
+    endereco: "TV GUERRA PASSOS, 219 SALA 1 - CANUDOS - BELÉM/PA",
+    cep: "66070-210"
+  },
+  {
+    id: 4,
+    nome: "PESQUISAS EXATAS",
+    cnpj: "13.272.852/0001-80",
+    razaoSocial: "PESQUISAS EXATAS EIRELI",
+    telefone: "",
+    endereco: "BRASIL",
+    cep: ""
+  },
+  {
+    id: 5,
+    nome: "JURU AVULSA",
+    cnpj: "41.673.215/0001-50",
+    razaoSocial: "JURUNENSE",
+    telefone: "",
+    endereco: "BRASIL",
+    cep: ""
+  }
+];
+
+// Dados de votação por filial
+const votacaoPorFiliais = [
+  {
+    filialId: 1,
+    filialNome: "JURUNENSE",
+    cnpj: "13.772.792/0001-64",
+    totalEleitores: 85,
+    votosComputados: 72,
+    participacao: 84.7,
+    candidatos: [
+      { numero: '01', nome: 'João Silva', departamento: 'Produção', votos: 32, porcentagem: 44.4 },
+      { numero: '02', nome: 'Maria Santos', departamento: 'Administração', votos: 28, porcentagem: 38.9 },
+      { numero: '03', nome: 'Pedro Costa', departamento: 'Qualidade', votos: 12, porcentagem: 16.7 }
+    ],
+    status: 'em_andamento',
+    horarioInicio: '08:00',
+    horarioFim: '18:00'
+  },
+  {
+    filialId: 2,
+    filialNome: "SEVEN TRANSPORTE",
+    cnpj: "10.902.984/0001-50",
+    totalEleitores: 45,
+    votosComputados: 38,
+    participacao: 84.4,
+    candidatos: [
+      { numero: '01', nome: 'Carlos Oliveira', departamento: 'Logística', votos: 18, porcentagem: 47.4 },
+      { numero: '02', nome: 'Ana Paula', departamento: 'Administração', votos: 15, porcentagem: 39.5 },
+      { numero: '03', nome: 'Roberto Lima', departamento: 'Operações', votos: 5, porcentagem: 13.1 }
+    ],
+    status: 'em_andamento',
+    horarioInicio: '08:00',
+    horarioFim: '18:00'
+  },
+  {
+    filialId: 3,
+    filialNome: "ANDRADE BATISTA",
+    cnpj: "28.345.081/0001-80",
+    totalEleitores: 32,
+    votosComputados: 28,
+    participacao: 87.5,
+    candidatos: [
+      { numero: '01', nome: 'Fernando Andrade', departamento: 'Construção', votos: 12, porcentagem: 42.9 },
+      { numero: '02', nome: 'Lucia Batista', departamento: 'Projetos', votos: 10, porcentagem: 35.7 },
+      { numero: '03', nome: 'Marcos Silva', departamento: 'Obras', votos: 6, porcentagem: 21.4 }
+    ],
+    status: 'em_andamento',
+    horarioInicio: '08:00',
+    horarioFim: '18:00'
+  },
+  {
+    filialId: 4,
+    filialNome: "PESQUISAS EXATAS",
+    cnpj: "13.272.852/0001-80",
+    totalEleitores: 18,
+    votosComputados: 15,
+    participacao: 83.3,
+    candidatos: [
+      { numero: '01', nome: 'Patricia Costa', departamento: 'Pesquisa', votos: 8, porcentagem: 53.3 },
+      { numero: '02', nome: 'Ricardo Santos', departamento: 'Análise', votos: 5, porcentagem: 33.3 },
+      { numero: '03', nome: 'Juliana Lima', departamento: 'Dados', votos: 2, porcentagem: 13.4 }
+    ],
+    status: 'em_andamento',
+    horarioInicio: '08:00',
+    horarioFim: '18:00'
+  },
+  {
+    filialId: 5,
+    filialNome: "JURU AVULSA",
+    cnpj: "41.673.215/0001-50",
+    totalEleitores: 12,
+    votosComputados: 10,
+    participacao: 83.3,
+    candidatos: [
+      { number: '01', nome: 'Antonio Avulso', departamento: 'Operacional', votos: 6, porcentagem: 60.0 },
+      { number: '02', nome: 'Sandra Avulso', departamento: 'Administrativo', votos: 4, porcentagem: 40.0 }
+    ],
+    status: 'em_andamento',
+    horarioInicio: '08:00',
+    horarioFim: '18:00'
+  }
+];
+
+// Dados consolidados
+const dadosConsolidados = {
+  totalEleitores: 192,
+  totalVotosComputados: 163,
+  participacaoGeral: 84.9,
+  filiaisAtivas: 5,
+  votacaoEncerrada: 0
+};
 
 // Mock data
 const mockResults = [
@@ -45,6 +186,7 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showNewCampaign, setShowNewCampaign] = useState(false);
   const [showNewSession, setShowNewSession] = useState(false);
+  const [selectedFiliais, setSelectedFiliais] = useState<string[]>([]);
 
   const handleLogin = () => {
     if (password === 'admin2025') {
@@ -133,8 +275,8 @@ export default function Admin() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-jurunense-primary">{mockStats.totalVoters}</div>
-              <p className="text-xs text-gray-600">Cadastrados no sistema</p>
+              <div className="text-3xl font-bold text-jurunense-primary">{dadosConsolidados.totalEleitores}</div>
+              <p className="text-xs text-gray-600">Todas as filiais</p>
             </CardContent>
           </Card>
 
@@ -146,10 +288,23 @@ export default function Admin() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-jurunense-secondary">{mockStats.votesCompleted}</div>
+              <div className="text-3xl font-bold text-jurunense-secondary">{dadosConsolidados.totalVotosComputados}</div>
               <p className="text-xs text-gray-600">
-                {mockStats.votingProgress.toFixed(1)}% de participação
+                {dadosConsolidados.participacaoGeral}% de participação
               </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white border-jurunense-gray shadow-lg">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-jurunense-primary flex items-center">
+                <Building2 className="w-4 h-4 mr-2" />
+                Filiais Ativas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-jurunense-primary">{dadosConsolidados.filiaisAtivas}</div>
+              <p className="text-xs text-gray-600">Em votação</p>
             </CardContent>
           </Card>
 
@@ -157,7 +312,7 @@ export default function Admin() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-jurunense-primary flex items-center">
                 <Clock className="w-4 h-4 mr-2" />
-                Status da Votação
+                Status Geral
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -165,30 +320,20 @@ export default function Admin() {
                 EM ANDAMENTO
               </Badge>
               <p className="text-xs text-gray-600 mt-1">
-                {mockStats.startTime} às {mockStats.endTime}
+                08:00 às 18:00
               </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white border-jurunense-gray shadow-lg">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-jurunense-primary flex items-center">
-                <Calendar className="w-4 h-4 mr-2" />
-                Sessões Ativas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-jurunense-primary">{mockStats.activeSessions}</div>
-              <p className="text-xs text-gray-600">Em funcionamento</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 bg-white border-jurunense-gray">
+          <TabsList className="grid w-full grid-cols-6 bg-white border-jurunense-gray">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-jurunense-primary data-[state=active]:text-white">
               Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="filiais" className="data-[state=active]:bg-jurunense-primary data-[state=active]:text-white">
+              Filiais
             </TabsTrigger>
             <TabsTrigger value="campaigns" className="data-[state=active]:bg-jurunense-primary data-[state=active]:text-white">
               Campanhas
@@ -207,25 +352,25 @@ export default function Admin() {
           {/* Dashboard */}
           <TabsContent value="dashboard" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Progresso da Votação */}
+              {/* Progresso Geral da Votação */}
               <Card className="bg-white border-jurunense-gray shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-jurunense-primary flex items-center">
                     <BarChart3 className="w-5 h-5 mr-2" />
-                    Progresso da Votação
+                    Progresso Geral da Votação
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div>
                       <div className="flex justify-between text-sm mb-2">
-                        <span className="text-jurunense-primary font-semibold">Participação</span>
-                        <span className="text-jurunense-secondary font-bold">{mockStats.votingProgress.toFixed(1)}%</span>
+                        <span className="text-jurunense-primary font-semibold">Participação Geral</span>
+                        <span className="text-jurunense-secondary font-bold">{dadosConsolidados.participacaoGeral}%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-3">
                         <div
                           className="bg-gradient-to-r from-jurunense-primary to-jurunense-secondary h-3 rounded-full transition-all duration-500"
-                          style={{ width: `${mockStats.votingProgress}%` }}
+                          style={{ width: `${dadosConsolidados.participacaoGeral}%` }}
                         ></div>
                       </div>
                     </div>
@@ -233,13 +378,13 @@ export default function Admin() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
                         <div className="text-2xl font-bold text-green-600">
-                          {mockStats.votesCompleted}
+                          {dadosConsolidados.totalVotosComputados}
                         </div>
                         <div className="text-sm text-green-700">Já votaram</div>
                       </div>
                       <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg text-center">
                         <div className="text-2xl font-bold text-orange-600">
-                          {mockStats.totalVoters - mockStats.votesCompleted}
+                          {dadosConsolidados.totalEleitores - dadosConsolidados.totalVotosComputados}
                         </div>
                         <div className="text-sm text-orange-700">Ainda não votaram</div>
                       </div>
@@ -248,69 +393,136 @@ export default function Admin() {
                 </CardContent>
               </Card>
 
-              {/* Gráfico de Pizza */}
+              {/* Gráfico de Participação por Filial */}
               <Card className="bg-white border-jurunense-gray shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-jurunense-primary flex items-center">
-                    <PieChartIcon className="w-5 h-5 mr-2" />
-                    Distribuição de Votos
+                    <Building2 className="w-5 h-5 mr-2" />
+                    Participação por Filial
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={mockResults}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ percentage }) => `${percentage.toFixed(1)}%`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="votes"
-                      >
-                        {mockResults.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
+                    <BarChart data={votacaoPorFiliais}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#BDBDBD" />
+                      <XAxis dataKey="filialNome" stroke="#131D52" />
+                      <YAxis stroke="#131D52" />
                       <Tooltip />
-                    </PieChart>
+                      <Bar dataKey="participacao" fill="#FE3B1F" />
+                    </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
 
-              {/* Resultados Parciais */}
+              {/* Resumo por Filial */}
               <Card className="lg:col-span-2 bg-white border-jurunense-gray shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-jurunense-primary">Resultados Parciais</CardTitle>
+                  <CardTitle className="text-jurunense-primary">Resumo por Filial</CardTitle>
                   <CardDescription className="text-jurunense-secondary">
-                    Apuração em tempo real - {mockStats.votesCompleted} votos computados
+                    Apuração em tempo real - {dadosConsolidados.totalVotosComputados} votos computados
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockResults.map((result, index) => (
-                      <div key={result.number} className="flex items-center justify-between p-4 border border-jurunense-gray rounded-lg hover:shadow-md transition-shadow">
+                    {votacaoPorFiliais.map((filial) => (
+                      <div key={filial.filialId} className="flex items-center justify-between p-4 border border-jurunense-gray rounded-lg hover:shadow-md transition-shadow">
                         <div className="flex items-center space-x-4">
                           <div className="w-12 h-12 bg-jurunense-primary rounded-full flex items-center justify-center text-white font-bold">
-                            {result.number}
+                            {filial.filialId}
                           </div>
                           <div>
-                            <h3 className="font-semibold text-jurunense-primary">{result.candidate}</h3>
+                            <h3 className="font-semibold text-jurunense-primary">{filial.filialNome}</h3>
                             <p className="text-sm text-gray-600">
-                              {result.department} • {result.percentage}% dos votos válidos
+                              {filial.cnpj} • {filial.participacao}% de participação
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {filial.votosComputados}/{filial.totalEleitores} eleitores
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-3xl font-bold text-jurunense-secondary">{result.votes}</div>
-                          <div className="text-sm text-gray-600">votos</div>
+                          <div className="text-3xl font-bold text-jurunense-secondary">{filial.participacao}%</div>
+                          <div className="text-sm text-gray-600">participação</div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Filiais */}
+          <TabsContent value="filiais" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-jurunense-primary">Apuração por Filial</h2>
+              <Button onClick={() => setActiveTab('results')} className="bg-jurunense-primary hover:bg-jurunense-primary/90">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Ver Apuração Detalhada
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {votacaoPorFiliais.map((filial) => (
+                <Card key={filial.filialId} className="bg-white border-jurunense-gray shadow-lg hover:shadow-xl transition-shadow">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className="text-jurunense-primary">{filial.filialNome}</CardTitle>
+                        <CardDescription className="text-jurunense-secondary">
+                          {filial.cnpj}
+                        </CardDescription>
+                      </div>
+                      <Badge className="bg-jurunense-secondary text-white">
+                        {filial.participacao}%
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {/* Progresso da filial */}
+                      <div>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-gray-600">Progresso</span>
+                          <span className="font-semibold">{filial.votosComputados}/{filial.totalEleitores}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-jurunense-secondary h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${filial.participacao}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Candidatos da filial */}
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-jurunense-primary text-sm">Candidatos:</h4>
+                        {filial.candidatos.map((candidato, index) => (
+                          <div key={index} className="flex justify-between items-center text-sm">
+                            <span className="text-gray-700">
+                              {candidato.numero} - {candidato.nome}
+                            </span>
+                            <span className="font-semibold text-jurunense-secondary">
+                              {candidato.votos} votos ({candidato.porcentagem}%)
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex space-x-2 pt-2">
+                        <Button size="sm" variant="outline" className="flex-1">
+                          <Eye className="w-4 h-4 mr-1" />
+                          Detalhes
+                        </Button>
+                        <Button size="sm" variant="outline" className="flex-1">
+                          <Download className="w-4 h-4 mr-1" />
+                          Relatório
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </TabsContent>
 
@@ -421,49 +633,102 @@ export default function Admin() {
           {/* Apuração */}
           <TabsContent value="results" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Gráfico de Barras */}
+              {/* Gráfico de Participação por Filial */}
               <Card className="bg-white border-jurunense-gray shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-jurunense-primary">Distribuição de Votos</CardTitle>
+                  <CardTitle className="text-jurunense-primary">Participação por Filial</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={mockResults}>
+                    <BarChart data={votacaoPorFiliais}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#BDBDBD" />
-                      <XAxis dataKey="number" stroke="#131D52" />
+                      <XAxis dataKey="filialNome" stroke="#131D52" />
                       <YAxis stroke="#131D52" />
                       <Tooltip />
-                      <Bar dataKey="votes" fill="#FE3B1F" />
+                      <Bar dataKey="participacao" fill="#FE3B1F" />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
 
-              {/* Gráfico de Linha - Evolução Temporal */}
+              {/* Gráfico de Votos por Filial */}
               <Card className="bg-white border-jurunense-gray shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-jurunense-primary">Evolução da Votação</CardTitle>
+                  <CardTitle className="text-jurunense-primary">Votos por Filial</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={[
-                      { time: '08:00', votes: 0 },
-                      { time: '10:00', votes: 25 },
-                      { time: '12:00', votes: 45 },
-                      { time: '14:00', votes: 75 },
-                      { time: '16:00', votes: 95 },
-                      { time: '18:00', votes: 106 }
-                    ]}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#BDBDBD" />
-                      <XAxis dataKey="time" stroke="#131D52" />
-                      <YAxis stroke="#131D52" />
+                    <PieChart>
+                      <Pie
+                        data={votacaoPorFiliais}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ filialNome, votosComputados }) => `${filialNome}: ${votosComputados}`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="votosComputados"
+                      >
+                        {votacaoPorFiliais.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
                       <Tooltip />
-                      <Line type="monotone" dataKey="votes" stroke="#FE3B1F" strokeWidth={3} />
-                    </LineChart>
+                    </PieChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Tabela Detalhada por Filial */}
+            <Card className="bg-white border-jurunense-gray shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-jurunense-primary">Apuração Detalhada por Filial</CardTitle>
+                <CardDescription className="text-jurunense-secondary">
+                  Resultados completos de cada filial
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {votacaoPorFiliais.map((filial) => (
+                    <div key={filial.filialId} className="border border-jurunense-gray rounded-lg p-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <div>
+                          <h3 className="text-lg font-semibold text-jurunense-primary">{filial.filialNome}</h3>
+                          <p className="text-sm text-gray-600">{filial.cnpj}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-jurunense-secondary">{filial.participacao}%</div>
+                          <div className="text-sm text-gray-600">
+                            {filial.votosComputados}/{filial.totalEleitores} eleitores
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {filial.candidatos.map((candidato, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-jurunense-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                {candidato.numero}
+                              </div>
+                              <div>
+                                <div className="font-semibold text-jurunense-primary">{candidato.nome}</div>
+                                <div className="text-sm text-gray-600">{candidato.departamento}</div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-jurunense-secondary">{candidato.votos}</div>
+                              <div className="text-sm text-gray-600">{candidato.porcentagem}%</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Relatórios */}
@@ -477,18 +742,18 @@ export default function Admin() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <Button variant="outline" className="h-24 flex-col bg-white border-jurunense-gray hover:bg-gray-50">
                     <BarChart3 className="w-8 h-8 mb-2 text-jurunense-primary" />
-                    <span className="font-semibold text-jurunense-primary">Relatório de Apuração</span>
-                    <span className="text-xs text-gray-600">Resultados detalhados</span>
+                    <span className="font-semibold text-jurunense-primary">Relatório Geral</span>
+                    <span className="text-xs text-gray-600">Todas as filiais</span>
+                  </Button>
+                  <Button variant="outline" className="h-24 flex-col bg-white border-jurunense-gray hover:bg-gray-50">
+                    <Building2 className="w-8 h-8 mb-2 text-jurunense-primary" />
+                    <span className="font-semibold text-jurunense-primary">Por Filial</span>
+                    <span className="text-xs text-gray-600">Resultados individuais</span>
                   </Button>
                   <Button variant="outline" className="h-24 flex-col bg-white border-jurunense-gray hover:bg-gray-50">
                     <Users className="w-8 h-8 mb-2 text-jurunense-primary" />
                     <span className="font-semibold text-jurunense-primary">Lista de Eleitores</span>
                     <span className="text-xs text-gray-600">Participantes e status</span>
-                  </Button>
-                  <Button variant="outline" className="h-24 flex-col bg-white border-jurunense-gray hover:bg-gray-50">
-                    <PieChartIcon className="w-8 h-8 mb-2 text-jurunense-primary" />
-                    <span className="font-semibold text-jurunense-primary">Análise Estatística</span>
-                    <span className="text-xs text-gray-600">Gráficos e métricas</span>
                   </Button>
                   <Button variant="outline" className="h-24 flex-col bg-white border-jurunense-gray hover:bg-gray-50">
                     <Download className="w-8 h-8 mb-2 text-jurunense-primary" />
