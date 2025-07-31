@@ -131,8 +131,8 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
       <UrnaScreen className="min-h-[400px] md:min-h-[450px] max-h-[500px]">
         <div className="text-center space-y-3 md:space-y-4">
           <div className="border-b border-gray-600 pb-3">
-            <h1 className="text-lg md:text-xl font-bold text-yellow-400">
-              ELEIÇÃO CIPA 2024
+            <h1 className="text-lg md:text-xl font-bold text-jurunense-secondary">
+              ELEIÇÃO CIPA 2025
             </h1>
             <p className="text-sm text-gray-300 mt-1">
               Comissão Interna de Prevenção de Acidentes
@@ -147,11 +147,11 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
             <div className="bg-gray-800 p-3 rounded border-2 border-gray-600">
               <div className="text-2xl md:text-3xl font-mono tracking-wider">
                 {currentField === 'cpf' ? (
-                  <span className="text-green-400">
+                  <span className="text-jurunense-secondary">
                     {cpf || '___.___.___-__'}
                   </span>
                 ) : (
-                  <span className="text-green-400">
+                  <span className="text-jurunense-secondary">
                     {birthDate || '__/__/____'}
                   </span>
                 )}

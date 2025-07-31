@@ -44,12 +44,12 @@ export const VoteSuccess = ({ onNewVoter }: VoteSuccessProps) => {
             <div className="font-mono">
               {dateStr} {timeStr}
             </div>
-            <div className="text-yellow-400 font-semibold">
+            <div className="text-jurunense-secondary font-semibold">
               TREINAMENTO
             </div>
             <div className="flex items-center space-x-1">
-              <div className="w-6 h-3 bg-green-500 rounded-sm relative">
-                <div className="absolute inset-0.5 bg-green-400 rounded-sm"></div>
+              <div className="w-6 h-3 bg-jurunense-secondary rounded-sm relative">
+                <div className="absolute inset-0.5 bg-jurunense-secondary/80 rounded-sm"></div>
               </div>
               <span className="text-xs">⚡</span>
             </div>
@@ -58,12 +58,12 @@ export const VoteSuccess = ({ onNewVoter }: VoteSuccessProps) => {
           {/* Main Content */}
           <div className="relative min-h-[200px] flex items-center justify-center">
             {/* FIM Text */}
-            <div className="text-6xl md:text-8xl font-bold text-green-400 tracking-wider">
+            <div className="text-6xl md:text-8xl font-bold text-jurunense-secondary tracking-wider">
               FIM
             </div>
             
             {/* VOTOU Watermark */}
-            <div className="absolute bottom-4 right-4 text-2xl md:text-3xl font-bold text-gray-600 opacity-30">
+            <div className="absolute bottom-4 right-4 text-2xl md:text-3xl font-bold text-jurunense-gray opacity-30">
               VOTOU
             </div>
           </div>

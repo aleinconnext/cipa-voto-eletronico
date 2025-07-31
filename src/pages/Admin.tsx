@@ -42,7 +42,7 @@ export default function Admin() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Área Administrativa</CardTitle>
-            <CardDescription>Sistema de Apuração CIPA 2024</CardDescription>
+            <CardDescription>Sistema de Apuração CIPA 2025</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>

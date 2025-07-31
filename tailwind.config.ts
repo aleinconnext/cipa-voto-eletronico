@@ -62,6 +62,12 @@ export default {
 					'button-orange-foreground': 'hsl(var(--urna-button-orange-foreground))',
 					body: 'hsl(var(--urna-body))'
 				},
+				// Jurunense colors
+				jurunense: {
+					primary: '#131D52',
+					secondary: '#FE3B1F',
+					gray: '#BDBDBD'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

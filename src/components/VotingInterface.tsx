@@ -66,19 +66,19 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-start max-w-7xl mx-auto">
         <UrnaScreen className="min-h-[400px] md:min-h-[450px] max-h-[500px]">
           <div className="text-center space-y-3 md:space-y-4">
-            <h1 className="text-lg md:text-xl font-bold text-yellow-400">CONFIRME SEU VOTO</h1>
+            <h1 className="text-lg md:text-xl font-bold text-jurunense-secondary">CONFIRME SEU VOTO</h1>
             
-            <div className="bg-gray-800 p-3 md:p-4 rounded border-2 border-yellow-600">
+            <div className="bg-gray-800 p-3 md:p-4 rounded border-2 border-jurunense-secondary">
               <div className="flex flex-col md:flex-row items-center space-y-3 md:space-y-0 md:space-x-4">
                 {selectedCandidate?.photo && (
                   <img 
                     src={selectedCandidate.photo} 
                     alt={selectedCandidate.name}
-                    className="w-20 h-28 md:w-24 md:h-32 object-cover border-2 border-yellow-400 rounded"
+                    className="w-20 h-28 md:w-24 md:h-32 object-cover border-2 border-jurunense-secondary rounded"
                   />
                 )}
                 <div className="text-center md:text-left">
-                  <div className="text-2xl md:text-3xl font-bold text-green-400 mb-1">
+                  <div className="text-2xl md:text-3xl font-bold text-jurunense-secondary mb-1">
                     {selectedCandidate?.number}
                   </div>
                   <div className="text-base md:text-lg font-semibold text-white">
@@ -94,11 +94,11 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
               </div>
             </div>
 
-            <div className="bg-yellow-900 border border-yellow-600 p-2 md:p-3 rounded animate-vote-confirm">
-              <p className="text-yellow-200 font-bold text-sm md:text-base">
+            <div className="bg-jurunense-primary/20 border border-jurunense-secondary p-2 md:p-3 rounded animate-vote-confirm">
+              <p className="text-white font-bold text-sm md:text-base">
                 ATENÇÃO: Confirme seu voto pressionando FINALIZAR VOTAÇÃO
               </p>
-              <p className="text-yellow-300 text-xs md:text-sm mt-1">
+              <p className="text-jurunense-gray text-xs md:text-sm mt-1">
                 Após confirmar, não será possível alterar seu voto
               </p>
             </div>
@@ -134,8 +134,8 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
       <UrnaScreen className="min-h-[400px] md:min-h-[450px] max-h-[500px]">
         <div className="text-center space-y-3 md:space-y-4">
           <div className="border-b border-gray-600 pb-3">
-            <h1 className="text-lg md:text-xl font-bold text-yellow-400">
-              ELEIÇÃO CIPA 2024
+            <h1 className="text-lg md:text-xl font-bold text-jurunense-secondary">
+              ELEIÇÃO CIPA 2025
             </h1>
             <p className="text-sm text-gray-300 mt-1">
               Representante dos Funcionários
@@ -149,7 +149,7 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
             
             <div className="bg-gray-800 p-3 rounded border-2 border-gray-600">
               <div className="text-3xl md:text-4xl font-mono font-bold tracking-wider">
-                <span className="text-green-400">
+                <span className="text-jurunense-secondary">
                   {candidateNumber || '__'}
                 </span>
                 <span className="animate-pulse">|</span>
@@ -157,17 +157,17 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
             </div>
 
             {selectedCandidate ? (
-              <div className="bg-gray-800 p-3 md:p-4 rounded border-2 border-green-600">
+              <div className="bg-gray-800 p-3 md:p-4 rounded border-2 border-jurunense-secondary">
                 <div className="flex flex-col md:flex-row items-center space-y-3 md:space-y-0 md:space-x-4">
                   {selectedCandidate.photo && (
                     <img 
                       src={selectedCandidate.photo} 
                       alt={selectedCandidate.name}
-                      className="w-16 h-24 md:w-20 md:h-28 object-cover border-2 border-green-400 rounded"
+                      className="w-16 h-24 md:w-20 md:h-28 object-cover border-2 border-jurunense-secondary rounded"
                     />
                   )}
                   <div className="text-center md:text-left">
-                    <div className="text-lg md:text-xl font-bold text-green-400 mb-1">
+                    <div className="text-lg md:text-xl font-bold text-jurunense-secondary mb-1">
                       {selectedCandidate.number}
                     </div>
                     <div className="text-sm md:text-base font-semibold text-white">
