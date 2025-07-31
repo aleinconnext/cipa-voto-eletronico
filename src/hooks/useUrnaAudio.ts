@@ -1,10 +1,9 @@
 import { useCallback, useRef, useEffect } from 'react';
-import fimSound from '../assets/sons/fim.mp3';
-import interSound from '../assets/sons/inter.mp3';
+import { Howl } from 'howler';
 
 export const useUrnaAudio = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
-  const audioFilesRef = useRef<{ [key: string]: HTMLAudioElement }>({});
+  const soundsRef = useRef<{ [key: string]: Howl }>({});
 
   // Função para garantir que o contexto de áudio está ativo
   const ensureAudioContext = useCallback(() => {
@@ -17,27 +16,55 @@ export const useUrnaAudio = () => {
     }
   }, []);
 
-  // Inicializar contexto de áudio
+  // Inicializar sons com Howler
   useEffect(() => {
-    const initAudioContext = () => {
+    const initSounds = () => {
       ensureAudioContext();
       
-      // Pré-carregar arquivos de áudio com volume máximo
-      if (!audioFilesRef.current.fim) {
-        audioFilesRef.current.fim = new Audio(fimSound);
-        audioFilesRef.current.fim.preload = 'auto';
-        audioFilesRef.current.fim.volume = 1.0; // Volume máximo
+      console.log('Inicializando sons com Howler...');
+      
+      // Inicializar sons MP3 com Howler
+      if (!soundsRef.current.fim) {
+        soundsRef.current.fim = new Howl({
+          src: ['/sounds/fim.mp3'],
+          volume: 1.0,
+          preload: true,
+          html5: false, // Usar Web Audio API
+          onload: () => {
+            console.log('✅ Som fim.mp3 carregado com sucesso');
+          },
+          onloaderror: (id, error) => {
+            console.warn('❌ Erro ao carregar som fim.mp3:', error);
+          },
+          onplay: () => {
+            console.log('🔊 Reproduzindo fim.mp3');
+          }
+        });
       }
-      if (!audioFilesRef.current.inter) {
-        audioFilesRef.current.inter = new Audio(interSound);
-        audioFilesRef.current.inter.preload = 'auto';
-        audioFilesRef.current.inter.volume = 1.0; // Volume máximo
+      
+      if (!soundsRef.current.inter) {
+        soundsRef.current.inter = new Howl({
+          src: ['/sounds/inter.mp3'],
+          volume: 1.0,
+          preload: true,
+          html5: false, // Usar Web Audio API
+          onload: () => {
+            console.log('✅ Som inter.mp3 carregado com sucesso');
+          },
+          onloaderror: (id, error) => {
+            console.warn('❌ Erro ao carregar som inter.mp3:', error);
+          },
+          onplay: () => {
+            console.log('🔊 Reproduzindo inter.mp3');
+          }
+        });
       }
     };
 
     // Inicializar quando o usuário interagir pela primeira vez
     const handleUserInteraction = () => {
-      initAudioContext();
+      console.log('🎵 Interação do usuário detectada - inicializando áudio');
+      initSounds();
       document.removeEventListener('touchstart', handleUserInteraction);
       document.removeEventListener('mousedown', handleUserInteraction);
       document.removeEventListener('keydown', handleUserInteraction);
@@ -54,40 +81,29 @@ export const useUrnaAudio = () => {
     };
   }, [ensureAudioContext]);
 
-  // Função para tocar arquivos de áudio com volume alto
-  const playAudioFile = useCallback((audioPath: string, volume: number = 1.0) => {
+  // Função para tocar sons MP3 com Howler
+  const playMP3Sound = useCallback((soundKey: 'fim' | 'inter') => {
     try {
       ensureAudioContext();
       
-      // Se temos o arquivo pré-carregado, use-o
-      const audioKey = audioPath.includes('fim') ? 'fim' : 'inter';
-      if (audioFilesRef.current[audioKey]) {
-        const audio = audioFilesRef.current[audioKey];
-        audio.volume = volume;
-        audio.currentTime = 0; // Reset para o início
+      const sound = soundsRef.current[soundKey];
+      if (sound) {
+        console.log(`🎵 Tentando tocar ${soundKey}, estado:`, sound.state());
         
-        // Garantir que o áudio seja reproduzido
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.warn('Erro ao reproduzir áudio pré-carregado:', error);
-            // Fallback: criar novo áudio
-            const fallbackAudio = new Audio(audioPath);
-            fallbackAudio.volume = volume;
-            fallbackAudio.play().catch(e => console.warn('Erro no fallback:', e));
-          });
+        if (sound.state() === 'loaded') {
+          sound.play();
+          return true;
+        } else {
+          console.warn(`⚠️ Som ${soundKey} não está carregado, estado:`, sound.state());
+          return false;
         }
-        return;
+      } else {
+        console.warn(`⚠️ Som ${soundKey} não encontrado`);
+        return false;
       }
-
-      // Fallback para criação dinâmica
-      const audio = new Audio(audioPath);
-      audio.volume = volume;
-      audio.play().catch(error => {
-        console.warn('Erro ao reproduzir áudio:', error);
-      });
     } catch (error) {
-      console.warn('Erro ao tocar áudio:', error);
+      console.warn(`❌ Erro ao tocar som ${soundKey}:`, error);
+      return false;
     }
   }, [ensureAudioContext]);
 
@@ -122,23 +138,25 @@ export const useUrnaAudio = () => {
 
   const playConfirmSound = useCallback(() => {
     // Som para botão confirmar - inter.mp3 com fallback para beep
-    try {
-      playAudioFile(interSound, 1.0);
-    } catch (error) {
+    console.log('🎯 Tentando tocar som CONFIRMA');
+    const success = playMP3Sound('inter');
+    if (!success) {
+      console.warn('🔄 Fallback para beep sintético - CONFIRMA');
       // Fallback para beep sintético
       createBeep(1000, 0.2, 'sine');
     }
-  }, [playAudioFile, createBeep]);
+  }, [playMP3Sound, createBeep]);
 
   const playFinalizarSound = useCallback(() => {
     // Som para botão finalizar votação - fim.mp3 com fallback para beep
-    try {
-      playAudioFile(fimSound, 1.0);
-    } catch (error) {
+    console.log('🎯 Tentando tocar som FINALIZAR');
+    const success = playMP3Sound('fim');
+    if (!success) {
+      console.warn('🔄 Fallback para beep sintético - FINALIZAR');
       // Fallback para beep sintético mais grave
       createBeep(600, 0.4, 'square');
     }
-  }, [playAudioFile, createBeep]);
+  }, [playMP3Sound, createBeep]);
 
   const playErrorSound = useCallback(() => {
     // Som de erro (beep mais grave e longo)
@@ -147,23 +165,25 @@ export const useUrnaAudio = () => {
 
   const playSuccessSound = useCallback(() => {
     // Som oficial do TSE para finalização - fim.mp3 com fallback para beep
-    try {
-      playAudioFile(fimSound, 1.0);
-    } catch (error) {
+    console.log('🎯 Tentando tocar som SUCCESS');
+    const success = playMP3Sound('fim');
+    if (!success) {
+      console.warn('🔄 Fallback para beep sintético - SUCCESS');
       // Fallback para beep sintético de sucesso
       createBeep(800, 0.3, 'sine');
     }
-  }, [playAudioFile, createBeep]);
+  }, [playMP3Sound, createBeep]);
 
   const playInterSound = useCallback(() => {
     // Som intermediário - inter.mp3 com fallback para beep
-    try {
-      playAudioFile(interSound, 1.0);
-    } catch (error) {
+    console.log('🎯 Tentando tocar som INTER');
+    const success = playMP3Sound('inter');
+    if (!success) {
+      console.warn('🔄 Fallback para beep sintético - INTER');
       // Fallback para beep sintético
       createBeep(900, 0.15, 'sine');
     }
-  }, [playAudioFile, createBeep]);
+  }, [playMP3Sound, createBeep]);
 
   return {
     playKeySound,
