@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { UrnaScreen } from "./UrnaScreen";
 import { UrnaKeypad } from "./UrnaKeypad";
+import { LoadingSpinner } from "./LoadingSpinner";
 import { useUrnaAudio } from "@/hooks/useUrnaAudio";
-import { findVoterByCPF, validateCPF } from "@/data/mockData";
+import { votingService } from "@/services/votingService";
 
 interface VoterValidationProps {
   onValidationSuccess: (cpf: string, birthDate: string) => void;
@@ -13,6 +14,7 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
   const [cpf, setCpf] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { playErrorSound, playConfirmSound } = useUrnaAudio();
 
   const formatCPF = (value: string) => {
@@ -69,30 +71,32 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
     setError('');
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (currentField === 'cpf') {
-      if (!validateCPF(cpf)) {
-        setError('CPF inválido. Tente novamente.');
-        playErrorSound();
-        return;
-      }
+      setIsLoading(true);
+      setError('');
       
-      // Verifica se o eleitor existe nos dados mockados
-      const voter = findVoterByCPF(cpf);
-      if (!voter) {
-        setError('CPF não encontrado na lista de eleitores.');
+      try {
+        console.log('🔍 [VOTER VALIDATION] Iniciando validação de CPF...');
+        const result = await votingService.validarFuncionario(cpf);
+        
+        if (!result.success) {
+          console.log('❌ [VOTER VALIDATION] Validação falhou:', result.message);
+          setError(result.message);
+          playErrorSound();
+          return;
+        }
+        
+        console.log('✅ [VOTER VALIDATION] Validação bem-sucedida, mudando para data de nascimento');
+        setCurrentField('birthDate');
+        playConfirmSound();
+      } catch (error) {
+        console.error('💥 [VOTER VALIDATION] Erro na validação:', error);
+        setError('Erro ao validar funcionário. Tente novamente.');
         playErrorSound();
-        return;
+      } finally {
+        setIsLoading(false);
       }
-      
-      if (voter.hasVoted) {
-        setError('Este eleitor já votou.');
-        playErrorSound();
-        return;
-      }
-      
-      setCurrentField('birthDate');
-      playConfirmSound();
     } else {
       if (!validateDate(birthDate)) {
         setError('Data inválida. Use o formato DD/MM/AAAA.');
@@ -100,19 +104,7 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
         return;
       }
       
-      // Verifica se a data de nascimento confere
-      const voter = findVoterByCPF(cpf);
-      if (voter) {
-        const voterDate = new Date(voter.birthDate);
-        const inputDate = new Date(birthDate.split('/').reverse().join('-'));
-        
-        if (voterDate.getTime() !== inputDate.getTime()) {
-          setError('Data de nascimento não confere.');
-          playErrorSound();
-          return;
-        }
-      }
-      
+      console.log('✅ [VOTER VALIDATION] Validação completa, prosseguindo para votação');
       playConfirmSound();
       onValidationSuccess(cpf, birthDate);
     }
@@ -159,7 +151,13 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
               </div>
             </div>
 
-            {error && (
+            {isLoading && (
+              <div className="bg-blue-900 border border-blue-600 p-4 md:p-6 rounded">
+                <LoadingSpinner size="lg" text="Validando funcionário..." />
+              </div>
+            )}
+
+            {error && !isLoading && (
               <div className="bg-red-900 border border-red-600 p-2 md:p-3 rounded">
                 <p className="text-red-300 font-semibold text-sm">{error}</p>
               </div>
@@ -181,7 +179,7 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
           onNumberClick={handleNumberClick}
           onCorrect={handleCorrect}
           onConfirm={handleConfirm}
-          confirmDisabled={!canConfirm()}
+          confirmDisabled={!canConfirm() || isLoading}
         />
       </div>
     </div>

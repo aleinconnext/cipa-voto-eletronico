@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { Calendar, Clock, Users, Vote, Settings, Plus, Edit, Trash2, Download, Eye, BarChart3, PieChart as PieChartIcon, Building2 } from "lucide-react";
 import logoJurunense from "@/assets/logo-jurunense-desk.svg?url";
+import { votingService } from "@/services/votingService";
 
 // Dados das filiais
 const filiais = [
@@ -187,6 +188,9 @@ export default function Admin() {
   const [showNewCampaign, setShowNewCampaign] = useState(false);
   const [showNewSession, setShowNewSession] = useState(false);
   const [selectedFiliais, setSelectedFiliais] = useState<string[]>([]);
+  
+  // Obtém estatísticas reais do service
+  const estatisticasReais = votingService.obterEstatisticas();
 
   const handleLogin = () => {
     if (password === 'admin2025') {
@@ -287,12 +291,12 @@ export default function Admin() {
                 Votos Computados
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-jurunense-secondary">{dadosConsolidados.totalVotosComputados}</div>
-              <p className="text-xs text-gray-600">
-                {dadosConsolidados.participacaoGeral}% de participação
-              </p>
-            </CardContent>
+                            <CardContent>
+                              <div className="text-3xl font-bold text-jurunense-secondary">{estatisticasReais.totalVotos}</div>
+                              <p className="text-xs text-gray-600">
+                                {dadosConsolidados.participacaoGeral}% de participação
+                              </p>
+                            </CardContent>
           </Card>
 
           <Card className="bg-white border-jurunense-gray shadow-lg">

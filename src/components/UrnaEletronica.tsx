@@ -31,7 +31,7 @@ export const UrnaEletronica = () => {
       case 'validation':
         return <VoterValidation onValidationSuccess={handleValidationSuccess} />;
       case 'voting':
-        return <VotingInterface onVoteConfirm={handleVoteConfirm} onBack={handleNewVoter} />;
+        return <VotingInterface onVoteConfirm={handleVoteConfirm} onBack={handleNewVoter} voterCPF={voterCPF} />;
       case 'success':
         return <VoteSuccess onNewVoter={handleNewVoter} />;
       default:

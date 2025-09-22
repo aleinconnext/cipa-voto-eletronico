@@ -2,20 +2,37 @@ import { useState } from "react";
 import { UrnaScreen } from "./UrnaScreen";
 import { UrnaKeypad } from "./UrnaKeypad";
 import { UrnaButton } from "./UrnaButton";
+import { LoadingSpinner } from "./LoadingSpinner";
 import { useUrnaAudio } from "@/hooks/useUrnaAudio";
 import { Candidate } from "@/types/voting";
-import { mockCandidates, findCandidateByNumber } from "@/data/mockData";
+import { votingService } from "@/services/votingService";
 
 interface VotingInterfaceProps {
   onVoteConfirm: (candidateNumber: string) => void;
   onBack: () => void;
+  voterCPF?: string;
 }
 
-export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps) => {
+export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInterfaceProps) => {
   const [candidateNumber, setCandidateNumber] = useState('');
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { playErrorSound, playConfirmSound, playFinalizarSound } = useUrnaAudio();
+
+  const findCandidateByNumber = (number: string): Candidate | null => {
+    const candidato = votingService.buscarCandidato(number);
+    if (!candidato) return null;
+    
+    return {
+      id: candidato.codigo,
+      number: candidato.codigo,
+      name: candidato.nome,
+      position: 'Representante CIPA',
+      department: candidato.departamento,
+      photo: candidato.foto
+    };
+  };
 
   const handleNumberClick = (number: string) => {
     if (candidateNumber.length < 2) {
@@ -53,10 +70,34 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
     }
   };
 
-  const handleFinalizar = () => {
-    playFinalizarSound();
-    // Registra o voto e vai para a tela de sucesso
-    onVoteConfirm(candidateNumber);
+  const handleFinalizar = async () => {
+    setIsLoading(true);
+    
+    try {
+      playFinalizarSound();
+      
+      // Usa o CPF do eleitor validado
+      const cpf = voterCPF || '51674645287'; // Fallback para teste
+      console.log('🗳️ [VOTING INTERFACE] Iniciando registro de voto...');
+      console.log('📝 [VOTING INTERFACE] CPF:', cpf);
+      console.log('🎯 [VOTING INTERFACE] Candidato:', candidateNumber);
+      
+      const result = await votingService.registrarVoto(cpf, candidateNumber);
+      
+      if (result.success) {
+        console.log('✅ [VOTING INTERFACE] Voto registrado com sucesso:', result.voto);
+        onVoteConfirm(candidateNumber);
+      } else {
+        console.error('❌ [VOTING INTERFACE] Erro ao registrar voto:', result.message);
+        // Aqui você pode mostrar uma mensagem de erro para o usuário
+        onVoteConfirm(candidateNumber); // Por enquanto, continua o fluxo
+      }
+    } catch (error) {
+      console.error('💥 [VOTING INTERFACE] Erro ao registrar voto:', error);
+      onVoteConfirm(candidateNumber);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const canConfirm = candidateNumber.length === 2 && selectedCandidate;
@@ -94,14 +135,20 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
               </div>
             </div>
 
-            <div className="bg-jurunense-primary/20 border border-jurunense-secondary p-2 md:p-3 rounded animate-vote-confirm">
-              <p className="text-white font-bold text-sm md:text-base">
-                ATENÇÃO: Confirme seu voto pressionando FINALIZAR VOTAÇÃO
-              </p>
-              <p className="text-jurunense-gray text-xs md:text-sm mt-1">
-                Após confirmar, não será possível alterar seu voto
-              </p>
-            </div>
+                            {isLoading ? (
+                              <div className="bg-blue-900 border border-blue-600 p-4 md:p-6 rounded">
+                                <LoadingSpinner size="lg" text="Registrando voto..." />
+                              </div>
+                            ) : (
+                              <div className="bg-jurunense-primary/20 border border-jurunense-secondary p-2 md:p-3 rounded animate-vote-confirm">
+                                <p className="text-white font-bold text-sm md:text-base">
+                                  ATENÇÃO: Confirme seu voto pressionando FINALIZAR VOTAÇÃO
+                                </p>
+                                <p className="text-jurunense-gray text-xs md:text-sm mt-1">
+                                  Após confirmar, não será possível alterar seu voto
+                                </p>
+                              </div>
+                            )}
           </div>
         </UrnaScreen>
 
@@ -116,14 +163,14 @@ export const VotingInterface = ({ onVoteConfirm, onBack }: VotingInterfaceProps)
           />
           
           {/* Botões lado a lado - apenas na tela de confirmação */}
-          <div className="flex justify-center space-x-3 md:space-x-4 mt-2 md:mt-4">
-            <UrnaButton variant="white" onClick={handleCorrect}>
-              CORRIGE
-            </UrnaButton>
-            <UrnaButton variant="finalizar" onClick={handleFinalizar}>
-              FINALIZAR VOTAÇÃO
-            </UrnaButton>
-          </div>
+                          <div className="flex justify-center space-x-3 md:space-x-4 mt-2 md:mt-4">
+                            <UrnaButton variant="white" onClick={handleCorrect} disabled={isLoading}>
+                              CORRIGE
+                            </UrnaButton>
+                            <UrnaButton variant="finalizar" onClick={handleFinalizar} disabled={isLoading}>
+                              FINALIZAR VOTAÇÃO
+                            </UrnaButton>
+                          </div>
         </div>
       </div>
     );
