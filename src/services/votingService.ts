@@ -103,6 +103,115 @@ class VotingService {
   ];
 
   /**
+   * Valida data de nascimento do funcionário
+   */
+  async validarDataNascimento(cpf: string, dataNascimento: string): Promise<{ success: boolean; funcionario?: Funcionario; message: string }> {
+    console.log('🔍 [VOTING SERVICE] Iniciando validação de data de nascimento...');
+    console.log('📝 [VOTING SERVICE] CPF:', cpf);
+    console.log('📅 [VOTING SERVICE] Data de nascimento:', dataNascimento);
+    
+    try {
+      // Remove formatação do CPF
+      const cpfLimpo = cpf.replace(/\D/g, '');
+      
+      if (cpfLimpo.length !== 11) {
+        console.log('❌ [VOTING SERVICE] CPF deve ter 11 dígitos. Atual:', cpfLimpo.length);
+        return { success: false, message: 'CPF deve ter 11 dígitos' };
+      }
+
+      // Valida CPF
+      console.log('🔢 [VOTING SERVICE] Validando algoritmo do CPF...');
+      if (!this.validarCPF(cpfLimpo)) {
+        console.log('❌ [VOTING SERVICE] CPF inválido pelo algoritmo');
+        return { success: false, message: 'CPF inválido' };
+      }
+      console.log('✅ [VOTING SERVICE] CPF válido pelo algoritmo');
+
+      // Formata data para o formato da API (YYYY-MM-DD)
+      const dataFormatada = this.formatarDataParaAPI(dataNascimento);
+      console.log('📅 [VOTING SERVICE] Data formatada para API:', dataFormatada);
+
+      // Busca funcionário na API com CPF e data de nascimento
+      const payload = {
+        "DataServerName": "FopFuncData",
+        "Filtro": `CPF='${cpfLimpo}' AND DTNASCIMENTO='${dataFormatada}'`,
+        "Contexto": "CODSISTEMA=G;CODCOLIGADA=1;CODUSUARIO=ALESSANDRO"
+      };
+      
+      console.log('🌐 [VOTING SERVICE] Enviando requisição para API...');
+      console.log('📤 [VOTING SERVICE] Payload:', JSON.stringify(payload, null, 2));
+      console.log('🔗 [VOTING SERVICE] URL:', `${API_BASE_URL}/data-server/read-view`);
+
+      const data = JSON.stringify(payload);
+      const response = await apiClient.post('/data-server/read-view', data);
+      
+      console.log('📥 [VOTING SERVICE] Resposta da API recebida');
+      console.log('📊 [VOTING SERVICE] Status:', response.status);
+      console.log('📋 [VOTING SERVICE] Dados:', JSON.stringify(response.data, null, 2));
+
+      const result = response.data;
+
+      // Verifica se a API retornou sucesso
+      if (!result.success) {
+        console.log('❌ [VOTING SERVICE] API retornou success: false');
+        console.log('💬 [VOTING SERVICE] Mensagem da API:', result.message);
+        return { success: false, message: 'Data de nascimento não confere' };
+      }
+
+      // Verifica se há dados do funcionário
+      if (!result.data || !result.data.PFunc) {
+        console.log('❌ [VOTING SERVICE] Nenhum funcionário encontrado com esta data de nascimento');
+        console.log('📋 [VOTING SERVICE] Estrutura de dados recebida:', JSON.stringify(result.data, null, 2));
+        return { success: false, message: 'Data de nascimento não confere' };
+      }
+
+      const funcionario = result.data.PFunc;
+      console.log('✅ [VOTING SERVICE] Funcionário encontrado com data de nascimento correta');
+      console.log('👤 [VOTING SERVICE] Dados do funcionário:', JSON.stringify(funcionario, null, 2));
+      console.log('📝 [VOTING SERVICE] Nome:', funcionario.NOME);
+      console.log('🆔 [VOTING SERVICE] CPF:', funcionario.CPF);
+      console.log('📅 [VOTING SERVICE] Data de nascimento:', funcionario.DTNASCIMENTO);
+      console.log('🏢 [VOTING SERVICE] Departamento:', funcionario.NOMEDEPARTAMENTO);
+      console.log('💼 [VOTING SERVICE] Função:', funcionario.NOME_FUNCAO);
+      console.log('📊 [VOTING SERVICE] Status:', funcionario.DESCRICAOSITUACAO);
+      
+      // Verifica se já votou
+      console.log('🗳️ [VOTING SERVICE] Verificando se funcionário já votou...');
+      const jaVotou = this.funcionarioJaVotou(cpfLimpo);
+      console.log('🔍 [VOTING SERVICE] Já votou?', jaVotou);
+      
+      if (jaVotou) {
+        console.log('❌ [VOTING SERVICE] Funcionário já votou anteriormente');
+        return { success: false, message: 'Este funcionário já votou' };
+      }
+
+      console.log('✅ [VOTING SERVICE] Validação completa bem-sucedida!');
+      return { 
+        success: true, 
+        funcionario,
+        message: 'Funcionário validado com sucesso'
+      };
+
+    } catch (error) {
+      console.error('💥 [VOTING SERVICE] Erro ao validar data de nascimento:', error);
+      console.error('🔍 [VOTING SERVICE] Tipo do erro:', typeof error);
+      console.error('📝 [VOTING SERVICE] Mensagem do erro:', error instanceof Error ? error.message : 'Erro desconhecido');
+      
+      if (axios.isAxiosError(error)) {
+        console.error('🌐 [VOTING SERVICE] Erro de rede detectado');
+        console.error('📊 [VOTING SERVICE] Status:', error.response?.status);
+        console.error('📋 [VOTING SERVICE] Dados do erro:', error.response?.data);
+        console.error('🔗 [VOTING SERVICE] URL:', error.config?.url);
+      }
+      
+      return { 
+        success: false, 
+        message: 'Erro ao conectar com o servidor. Tente novamente.' 
+      };
+    }
+  }
+
+  /**
    * Valida e busca funcionário pelo CPF
    */
   async validarFuncionario(cpf: string): Promise<{ success: boolean; funcionario?: Funcionario; message: string }> {
@@ -204,6 +313,40 @@ class VotingService {
         message: 'Erro ao conectar com o servidor. Tente novamente.' 
       };
     }
+  }
+
+  /**
+   * Formata data de DD/MM/AAAA para YYYY-MM-DD
+   */
+  private formatarDataParaAPI(data: string): string {
+    // Remove formatação (DD/MM/AAAA)
+    const numeros = data.replace(/\D/g, '');
+    
+    if (numeros.length !== 8) {
+      throw new Error('Data deve ter 8 dígitos');
+    }
+    
+    const dia = numeros.substr(0, 2);
+    const mes = numeros.substr(2, 2);
+    const ano = numeros.substr(4, 4);
+    
+    // Validações básicas
+    const diaNum = parseInt(dia);
+    const mesNum = parseInt(mes);
+    const anoNum = parseInt(ano);
+    
+    if (diaNum < 1 || diaNum > 31) {
+      throw new Error('Dia inválido');
+    }
+    if (mesNum < 1 || mesNum > 12) {
+      throw new Error('Mês inválido');
+    }
+    if (anoNum < 1900 || anoNum > new Date().getFullYear()) {
+      throw new Error('Ano inválido');
+    }
+    
+    // Retorna no formato YYYY-MM-DD
+    return `${ano}-${mes}-${dia}`;
   }
 
   /**

@@ -104,9 +104,30 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
         return;
       }
       
-      console.log('✅ [VOTER VALIDATION] Validação completa, prosseguindo para votação');
-      playConfirmSound();
-      onValidationSuccess(cpf, birthDate);
+      setIsLoading(true);
+      setError('');
+      
+      try {
+        console.log('🔍 [VOTER VALIDATION] Iniciando validação de data de nascimento...');
+        const result = await votingService.validarDataNascimento(cpf, birthDate);
+        
+        if (!result.success) {
+          console.log('❌ [VOTER VALIDATION] Validação de data falhou:', result.message);
+          setError(result.message);
+          playErrorSound();
+          return;
+        }
+        
+        console.log('✅ [VOTER VALIDATION] Validação completa, prosseguindo para votação');
+        playConfirmSound();
+        onValidationSuccess(cpf, birthDate);
+      } catch (error) {
+        console.error('💥 [VOTER VALIDATION] Erro na validação de data:', error);
+        setError('Erro ao validar data de nascimento. Tente novamente.');
+        playErrorSound();
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -153,7 +174,10 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
 
             {isLoading && (
               <div className="bg-blue-900 border border-blue-600 p-4 md:p-6 rounded">
-                <LoadingSpinner size="lg" text="Validando funcionário..." />
+                <LoadingSpinner 
+                  size="lg" 
+                  text={currentField === 'cpf' ? "Validando funcionário..." : "Validando data de nascimento..."} 
+                />
               </div>
             )}
 
