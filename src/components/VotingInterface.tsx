@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { UrnaScreen } from "./UrnaScreen";
 import { UrnaKeypad } from "./UrnaKeypad";
 import { UrnaButton } from "./UrnaButton";
@@ -14,41 +14,121 @@ interface VotingInterfaceProps {
 }
 
 export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInterfaceProps) => {
+  const DEFAULT_MAX_DIGITS = 10;
+  const DEFAULT_MIN_DIGITS = 1;
+
   const [candidateNumber, setCandidateNumber] = useState('');
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingCandidate, setIsFetchingCandidate] = useState(false);
+  const [candidateError, setCandidateError] = useState(false);
+  const [maxDigits, setMaxDigits] = useState(DEFAULT_MAX_DIGITS);
+  const [minDigitsForLookup, setMinDigitsForLookup] = useState(DEFAULT_MIN_DIGITS);
+  const lastRequestIdRef = useRef(0);
+  const lastSearchRef = useRef('');
+  const isComponentMounted = useRef(true);
   const { playErrorSound, playConfirmSound, playFinalizarSound } = useUrnaAudio();
 
-  const findCandidateByNumber = (number: string): Candidate | null => {
-    const candidato = votingService.buscarCandidato(number);
-    if (!candidato) return null;
-    
-    return {
-      id: candidato.codigo,
-      number: candidato.codigo,
-      name: candidato.nome,
-      position: 'Representante CIPA',
-      department: candidato.departamento,
-      photo: candidato.foto
+  useEffect(() => {
+    isComponentMounted.current = true;
+
+    const configurarCandidatos = async () => {
+      try {
+        const candidatos = await votingService.obterCandidatos();
+
+        if (!isComponentMounted.current) {
+          return;
+        }
+
+        const maiorQuantidadeDigitos = candidatos.reduce((max, candidato) => {
+          const codigo = candidato.codigo?.trim() ?? '';
+          return Math.max(max, codigo.length);
+        }, 0);
+
+        const menorQuantidadeDigitos = candidatos.reduce((min, candidato) => {
+          const codigo = candidato.codigo?.trim() ?? '';
+          if (!codigo) return min;
+          return Math.min(min, codigo.length);
+        }, Infinity);
+
+        setMaxDigits(maiorQuantidadeDigitos || DEFAULT_MAX_DIGITS);
+        setMinDigitsForLookup(Number.isFinite(menorQuantidadeDigitos) ? Math.max(DEFAULT_MIN_DIGITS, menorQuantidadeDigitos) : DEFAULT_MIN_DIGITS);
+      } catch (error) {
+        console.error('💥 [VOTING INTERFACE] Erro ao carregar candidatos para configuração:', error);
+        setMaxDigits(DEFAULT_MAX_DIGITS);
+      }
     };
-  };
+
+    configurarCandidatos();
+
+    return () => {
+      isComponentMounted.current = false;
+    };
+  }, []);
+
+  const findCandidateByNumber = useCallback(async (number: string): Promise<Candidate | null> => {
+    const currentRequestId = ++lastRequestIdRef.current;
+    setCandidateError(false);
+    setIsFetchingCandidate(true);
+
+    try {
+      const candidato = await votingService.buscarCandidato(number);
+      if (!candidato) return null;
+
+      return {
+        id: candidato.codigo,
+        number: candidato.codigo,
+        name: candidato.nome,
+        position: 'Representante CIPA',
+        department: candidato.departamento,
+        photo: candidato.foto
+      };
+    } finally {
+      if (lastRequestIdRef.current === currentRequestId) {
+        setIsFetchingCandidate(false);
+      }
+    }
+  }, []);
 
   const handleNumberClick = (number: string) => {
-    if (candidateNumber.length < 2) {
-      const newNumber = candidateNumber + number;
-      setCandidateNumber(newNumber);
-      
-      // Se completou 2 dígitos, procura o candidato
-      if (newNumber.length === 2) {
-        const candidate = findCandidateByNumber(newNumber);
-        if (candidate) {
-          setSelectedCandidate(candidate);
-          playConfirmSound();
-        } else {
-          playErrorSound();
-        }
-      }
+    if (candidateNumber.length >= maxDigits) {
+      return;
+    }
+
+    const newNumber = candidateNumber + number;
+    setCandidateNumber(newNumber);
+    setCandidateError(false);
+
+    if (newNumber.length >= minDigitsForLookup) {
+      lastSearchRef.current = newNumber;
+      setSelectedCandidate(null);
+
+      findCandidateByNumber(newNumber)
+        .then(candidate => {
+          if (lastSearchRef.current !== newNumber) {
+            return;
+          }
+
+          if (candidate) {
+            setSelectedCandidate(candidate);
+            playConfirmSound();
+          } else {
+            setSelectedCandidate(null);
+            setCandidateError(true);
+            if (newNumber.length === maxDigits) {
+              playErrorSound();
+            }
+          }
+        })
+        .catch(error => {
+          console.error('💥 [VOTING INTERFACE] Erro ao buscar candidato:', error);
+          if (lastSearchRef.current === newNumber) {
+            setSelectedCandidate(null);
+            setCandidateError(true);
+            playErrorSound();
+          }
+        });
     }
   };
 
@@ -60,6 +140,8 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
       // Se estiver na tela de votação, limpa o campo para nova pesquisa
       setCandidateNumber('');
       setSelectedCandidate(null);
+      setCandidateError(false);
+      lastSearchRef.current = '';
     }
   };
 
@@ -100,7 +182,7 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
     }
   };
 
-  const canConfirm = candidateNumber.length === 2 && selectedCandidate;
+  const canConfirm = selectedCandidate && !isFetchingCandidate;
 
   if (showConfirmation) {
     return (
@@ -202,8 +284,16 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
                 <span className="animate-pulse">|</span>
               </div>
             </div>
-
-            {selectedCandidate ? (
+            {isFetchingCandidate ? (
+              <div className="bg-blue-900 border border-blue-600 p-2 md:p-3 rounded">
+          <div className="flex items-center space-x-2">
+            <LoadingSpinner size="sm" />
+            <p className="text-blue-300 font-semibold text-sm">
+              Buscando candidato...
+            </p>
+          </div>
+              </div>
+            ) : selectedCandidate ? (
               <div className="bg-gray-800 p-3 md:p-4 rounded border-2 border-jurunense-secondary">
                 <div className="flex flex-col md:flex-row items-center space-y-3 md:space-y-0 md:space-x-4">
                   {selectedCandidate.photo && (
@@ -229,7 +319,7 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
                   </div>
                 </div>
               </div>
-            ) : candidateNumber.length === 2 ? (
+            ) : candidateNumber.length >= minDigitsForLookup && candidateError ? (
               <div className="bg-red-900 border border-red-600 p-2 md:p-3 rounded">
                 <p className="text-red-300 font-semibold text-sm">
                   NÚMERO INVÁLIDO

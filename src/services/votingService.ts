@@ -78,9 +78,33 @@ export interface Candidato {
   foto?: string;
 }
 
+interface CandidatoAPI {
+  CHAPA: string;
+  NOME: string;
+  CODPESSOA?: string;
+  CODCOLIGADA?: string;
+  CODCOMISSAO?: string;
+  CODELEICAO?: string;
+  DESCORIGEM?: string;
+  DTCANDIDATURA?: string;
+  IDINSCRICAO?: string;
+  NUMVOTOS?: string;
+  ORIGEMPORTAL?: string;
+  FOTO?: string;
+  DEPARTAMENTO?: string;
+}
+
 // Configuração base da API
 const API_BASE_URL = 'https://totvs-tbc.jurunense.com';
 const AUTH_TOKEN = 'QUxFU1NBTkRSTzo1MTY3NDY0NTI4NzoxNzU2NTU2NTI5OTYyOjBmOGIxOTdmNGM0YWVkNzNkYzdiZjY5NGM0OWRjNWQ1Mzc5ZGNiZTgwYzc1YTZmMDI5MjIyNmZmYThiOTIzOGY=';
+const API_CONTEXT = 'CODSISTEMA=G;CODCOLIGADA=1;CODUSUARIO=ALESSANDRO';
+
+const DATA_SERVER_CONFIG = {
+  candidatos: {
+    nome: 'SmtCandidatosCipaData',
+    filtro: "CODCOMISSAO='202503'"
+  }
+} as const;
 
 // Instância do axios configurada
 const apiClient = axios.create({
@@ -94,13 +118,115 @@ const apiClient = axios.create({
 
 class VotingService {
   private votos: Voto[] = [];
-  private candidatos: Candidato[] = [
-    { codigo: '10', nome: 'MARIA SILVA SANTOS', departamento: 'Produção' },
-    { codigo: '20', nome: 'JOÃO CARLOS OLIVEIRA', departamento: 'Administração' },
-    { codigo: '30', nome: 'ANA PAULA FERREIRA', departamento: 'Qualidade' },
-    { codigo: '40', nome: 'PEDRO HENRIQUE LIMA', departamento: 'TI' },
-    { codigo: '50', nome: 'FERNANDA COSTA RODRIGUES', departamento: 'RH' }
-  ];
+  private candidatos: Candidato[] = [];
+  private candidatosCarregados = false;
+  private carregamentoCandidatos: Promise<void> | null = null;
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      this.iniciarCarregamentoCandidatos();
+    }
+  }
+
+  private iniciarCarregamentoCandidatos(): void {
+    if (!this.carregamentoCandidatos) {
+      this.carregamentoCandidatos = this.carregarCandidatosDaAPI()
+        .catch(error => {
+          console.error('💥 [VOTING SERVICE] Falha ao carregar candidatos na inicialização:', error);
+        })
+        .finally(() => {
+          this.carregamentoCandidatos = null;
+        });
+    }
+  }
+
+  private async garantirCandidatosCarregados(): Promise<void> {
+    if (this.candidatosCarregados) {
+      return;
+    }
+
+    this.iniciarCarregamentoCandidatos();
+
+    if (this.carregamentoCandidatos) {
+      await this.carregamentoCandidatos;
+    }
+  }
+
+  private mapearCandidatoDaAPI(candidato: CandidatoAPI): Candidato | null {
+    const codigo = candidato.CHAPA?.trim();
+    const nome = candidato.NOME?.trim();
+
+    if (!codigo || !nome) {
+      console.warn('⚠️ [VOTING SERVICE] Candidato ignorado por ausência de código ou nome:', candidato);
+      return null;
+    }
+
+    const departamento = candidato.DEPARTAMENTO?.trim() || candidato.DESCORIGEM?.trim() || 'Não informado';
+
+    return {
+      codigo,
+      nome,
+      departamento,
+      foto: candidato.FOTO?.trim() || undefined
+    };
+  }
+
+  private async carregarCandidatosDaAPI(): Promise<void> {
+    console.log('🌐 [VOTING SERVICE] Carregando candidatos da API...');
+
+    const payload = {
+      DataServerName: DATA_SERVER_CONFIG.candidatos.nome,
+      Filtro: DATA_SERVER_CONFIG.candidatos.filtro,
+      Contexto: API_CONTEXT
+    };
+
+    try {
+      console.log('📤 [VOTING SERVICE] Payload candidatos:', JSON.stringify(payload, null, 2));
+      const response = await apiClient.post('/data-server/read-view', JSON.stringify(payload));
+      console.log('📥 [VOTING SERVICE] Resposta candidatos recebida:', response.status);
+
+      const resultado = response.data;
+
+      if (!resultado?.success) {
+        const mensagem = resultado?.message || 'Resposta da API sem sucesso';
+        console.error('❌ [VOTING SERVICE] API de candidatos retornou erro:', mensagem);
+        throw new Error('Não foi possível carregar os candidatos.');
+      }
+
+      const listaCandidatos: CandidatoAPI[] = resultado?.data?.VCANDIDATOSCIPA || [];
+
+      if (!Array.isArray(listaCandidatos) || listaCandidatos.length === 0) {
+        console.warn('⚠️ [VOTING SERVICE] Nenhum candidato retornado pela API.');
+        this.candidatos = [];
+        this.candidatosCarregados = true;
+        return;
+      }
+
+      const candidatosMapeados = listaCandidatos
+        .map(c => this.mapearCandidatoDaAPI(c))
+        .filter((candidato): candidato is Candidato => candidato !== null);
+
+      this.candidatos = candidatosMapeados;
+      this.candidatosCarregados = true;
+
+      console.log('✅ [VOTING SERVICE] Candidatos carregados:', this.candidatos.length);
+    } catch (error) {
+      console.error('💥 [VOTING SERVICE] Erro ao carregar candidatos da API:', error);
+      this.candidatosCarregados = false;
+      throw error;
+    }
+  }
+
+  async obterCandidatos(): Promise<Candidato[]> {
+    await this.garantirCandidatosCarregados();
+    return this.candidatos;
+  }
+
+  async atualizarCandidatos(): Promise<Candidato[]> {
+    this.candidatosCarregados = false;
+    await this.carregarCandidatosDaAPI();
+    return this.candidatos;
+  }
 
   /**
    * Valida data de nascimento do funcionário
@@ -135,7 +261,7 @@ class VotingService {
       const payload = {
         "DataServerName": "FopFuncData",
         "Filtro": `CPF='${cpfLimpo}' AND DTNASCIMENTO='${dataFormatada}'`,
-        "Contexto": "CODSISTEMA=G;CODCOLIGADA=1;CODUSUARIO=ALESSANDRO"
+        "Contexto": API_CONTEXT
       };
       
       console.log('🌐 [VOTING SERVICE] Enviando requisição para API...');
@@ -240,7 +366,7 @@ class VotingService {
       const payload = {
         "DataServerName": "FopFuncData",
         "Filtro": `CPF='${cpfLimpo}' AND CODSITUACAO='A'`,
-        "Contexto": "CODSISTEMA=G;CODCOLIGADA=1;CODUSUARIO=ALESSANDRO"
+        "Contexto": API_CONTEXT
       };
       
       console.log('🌐 [VOTING SERVICE] Enviando requisição para API...');
@@ -386,8 +512,9 @@ class VotingService {
   /**
    * Busca candidato pelo código
    */
-  buscarCandidato(codigo: string): Candidato | null {
+  async buscarCandidato(codigo: string): Promise<Candidato | null> {
     console.log('🎯 [VOTING SERVICE] Buscando candidato com código:', codigo);
+    await this.garantirCandidatosCarregados();
     const candidato = this.candidatos.find(c => c.codigo === codigo) || null;
     
     if (candidato) {
@@ -420,7 +547,7 @@ class VotingService {
 
       // Valida candidato
       console.log('🎯 [VOTING SERVICE] Buscando candidato...');
-      const candidato = this.buscarCandidato(codigoCandidato);
+      const candidato = await this.buscarCandidato(codigoCandidato);
       if (!candidato) {
         console.log('❌ [VOTING SERVICE] Candidato não encontrado:', codigoCandidato);
         return { success: false, message: 'Candidato não encontrado' };
@@ -485,9 +612,7 @@ class VotingService {
     });
 
     this.votos.forEach(voto => {
-      if (votosPorCandidato[voto.codigoCandidato] !== undefined) {
-        votosPorCandidato[voto.codigoCandidato]++;
-      }
+      votosPorCandidato[voto.codigoCandidato] = (votosPorCandidato[voto.codigoCandidato] ?? 0) + 1;
     });
 
     const estatisticas = {
