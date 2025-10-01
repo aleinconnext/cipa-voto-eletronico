@@ -79,7 +79,7 @@ export const UrnaEletronica = () => {
           </div>
         </div>
 
-        {/* Bottom Navigation */}
+        {/* Bottom Navigation 
         <div className="mt-8 text-center">
           <a
             href="/admin"
@@ -87,7 +87,7 @@ export const UrnaEletronica = () => {
           >
             Área Administrativa
           </a>
-        </div>
+        </div>*/}
       </div>
     </div>
   );

@@ -6,6 +6,9 @@ import { LoadingSpinner } from "./LoadingSpinner";
 import { useUrnaAudio } from "@/hooks/useUrnaAudio";
 import { Candidate } from "@/types/voting";
 import { votingService } from "@/services/votingService";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Users } from "lucide-react";
 
 interface VotingInterfaceProps {
   onVoteConfirm: (candidateNumber: string) => void;
@@ -25,6 +28,8 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
   const [candidateError, setCandidateError] = useState(false);
   const [maxDigits, setMaxDigits] = useState(DEFAULT_MAX_DIGITS);
   const [minDigitsForLookup, setMinDigitsForLookup] = useState(DEFAULT_MIN_DIGITS);
+  const [candidatesList, setCandidatesList] = useState<Candidate[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const lastRequestIdRef = useRef(0);
   const lastSearchRef = useRef('');
   const isComponentMounted = useRef(true);
@@ -54,6 +59,18 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
 
         setMaxDigits(maiorQuantidadeDigitos || DEFAULT_MAX_DIGITS);
         setMinDigitsForLookup(Number.isFinite(menorQuantidadeDigitos) ? Math.max(DEFAULT_MIN_DIGITS, menorQuantidadeDigitos) : DEFAULT_MIN_DIGITS);
+
+        // Mapear candidatos para o formato da interface
+        const candidatosMapeados = candidatos.map(candidato => ({
+          id: candidato.codigo,
+          number: candidato.codigo,
+          name: candidato.nome,
+          position: 'Representante CIPA',
+          department: candidato.departamento,
+          photo: candidato.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(candidato.nome)}&background=131D52&color=fff&size=100`
+        }));
+
+        setCandidatesList(candidatosMapeados);
       } catch (error) {
         console.error('💥 [VOTING INTERFACE] Erro ao carregar candidatos para configuração:', error);
         setMaxDigits(DEFAULT_MAX_DIGITS);
@@ -272,9 +289,65 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-base md:text-lg font-semibold">
-              Digite o número do candidato:
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-base md:text-lg font-semibold">
+                Digite o número do candidato:
+              </h2>
+              
+              <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="bg-jurunense-primary/20 border-jurunense-secondary text-jurunense-secondary hover:bg-jurunense-primary/30"
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Ver Candidatos
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold text-jurunense-secondary">
+                      Lista de Candidatos - Eleição CIPA 2025
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                    {candidatesList.map((candidate) => (
+                      <div 
+                        key={candidate.id}
+                        className="bg-gray-800 p-4 rounded-lg border border-gray-600 hover:border-jurunense-secondary transition-colors cursor-pointer"
+                        onClick={() => {
+                          setCandidateNumber(candidate.number);
+                          setIsModalOpen(false);
+                          // Simular busca do candidato
+                          setSelectedCandidate(candidate);
+                          playConfirmSound();
+                        }}
+                      >
+                        <div className="flex flex-col items-center text-center space-y-3">
+                          <img 
+                            src={candidate.photo} 
+                            alt={candidate.name}
+                            className="w-16 h-16 rounded-full object-cover border-2 border-jurunense-secondary"
+                          />
+                          <div>
+                            <div className="text-lg font-bold text-jurunense-secondary mb-1">
+                              {candidate.number}
+                            </div>
+                            <div className="text-sm font-semibold text-white mb-1">
+                              {candidate.name}
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              {candidate.department}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
             
             <div className="bg-gray-800 p-3 rounded border-2 border-gray-600">
               <div className="text-3xl md:text-4xl font-mono font-bold tracking-wider">
@@ -331,9 +404,10 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
             ) : null}
 
             <div className="text-xs md:text-sm text-gray-400 mt-3 space-y-1">
-              <p>• Digite 2 números para o candidato</p>
+              <p>• Digite o número do candidato (1 a {maxDigits} dígitos)</p>
               <p>• Use CORRIGE para apagar</p>
               <p>• Use CONFIRMA para votar</p>
+              <p>• Clique em "Ver Candidatos" para ver a lista completa</p>
             </div>
           </div>
         </div>
