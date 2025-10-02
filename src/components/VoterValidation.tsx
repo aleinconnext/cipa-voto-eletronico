@@ -141,7 +141,14 @@ export const VoterValidation = ({ onValidationSuccess, onCancel }: VoterValidati
         
         // Definir o funcionário atual no serviço para uso posterior
         if (result.funcionario) {
-          votingService.definirFuncionarioAtual(result.funcionario);
+          // Se funcionario é um array, pegar o primeiro registro ativo
+          const funcionarioParaDefinir = Array.isArray(result.funcionario) 
+            ? result.funcionario.find(f => f.CODSITUACAO === 'A') || result.funcionario[0]
+            : result.funcionario;
+          
+          console.log('👤 [VOTER VALIDATION] Definindo funcionário atual:', funcionarioParaDefinir.NOME);
+          console.log('🏢 [VOTER VALIDATION] CODCOLIGADA:', funcionarioParaDefinir.CODCOLIGADA);
+          votingService.definirFuncionarioAtual(funcionarioParaDefinir);
         }
         
         playConfirmSound();
