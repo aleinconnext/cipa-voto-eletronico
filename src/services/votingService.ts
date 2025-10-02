@@ -112,7 +112,13 @@ interface CandidatoAPI {
 // Configuração base da API
 const API_BASE_URL = 'https://totvs-tbc.jurunense.com';
 const AUTH_TOKEN = 'QUxFU1NBTkRSTzo1MTY3NDY0NTI4NzoxNzU2NTU2NTI5OTYyOjBmOGIxOTdmNGM0YWVkNzNkYzdiZjY5NGM0OWRjNWQ1Mzc5ZGNiZTgwYzc1YTZmMDI5MjIyNmZmYThiOTIzOGY=';
-const API_CONTEXT = 'CODSISTEMA=G;CODCOLIGADA=1;CODUSUARIO=ALESSANDRO';
+
+/**
+ * Gera o contexto da API com CODCOLIGADA dinâmico
+ */
+function gerarContextoAPI(codColigada: string = '1'): string {
+  return `CODSISTEMA=G;CODCOLIGADA=${codColigada};CODUSUARIO=ALESSANDRO`;
+}
 
 // Mapeamento de CODCOLIGADA para CODCOMISSAO
 const MAPEAMENTO_COLIGADA_COMISSAO = {
@@ -224,7 +230,7 @@ class VotingService {
     const payload = {
       DataServerName: DATA_SERVER_CONFIG.candidatos.nome,
       Filtro: filtro,
-      Contexto: API_CONTEXT
+      Contexto: gerarContextoAPI(codColigada)
     };
 
     try {
@@ -511,7 +517,7 @@ class VotingService {
     const payload = {
       DataServerName: DATA_SERVER_CONFIG.candidatos.nome,
       Filtro: filtro,
-      Contexto: API_CONTEXT
+      Contexto: gerarContextoAPI(codColigada)
     };
 
     const response = await apiClient.post('/data-server/read-view', JSON.stringify(payload));
@@ -557,7 +563,7 @@ class VotingService {
       const payload = {
         "DataServerName": "FopFuncData",
         "Filtro": `CPF='${cpfLimpo}' AND DTNASCIMENTO='${dataFormatada}'`,
-        "Contexto": API_CONTEXT
+        "Contexto": gerarContextoAPI('1') // Usar CODCOLIGADA=1 para validação inicial
       };
       
       console.log('🌐 [VOTING SERVICE] Enviando requisição para API...');
@@ -662,7 +668,7 @@ class VotingService {
       const payload = {
         "DataServerName": "FopFuncData",
         "Filtro": `CPF='${cpfLimpo}' AND CODSITUACAO='A'`,
-        "Contexto": API_CONTEXT
+        "Contexto": gerarContextoAPI('1') // Usar CODCOLIGADA=1 para validação inicial
       };
       
       console.log('🌐 [VOTING SERVICE] Enviando requisição para API...');
