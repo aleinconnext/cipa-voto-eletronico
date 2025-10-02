@@ -40,7 +40,17 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
 
     const configurarCandidatos = async () => {
       try {
-        const candidatos = await votingService.obterCandidatos();
+        // Obter CODCOLIGADA do funcionário atual
+        const funcionarioAtual = votingService.obterFuncionarioAtual();
+        const codColigada = funcionarioAtual?.CODCOLIGADA;
+        
+        if (!codColigada) {
+          throw new Error('CODCOLIGADA do funcionário não encontrada');
+        }
+        
+        console.log('🏢 [VOTING INTERFACE] CODCOLIGADA do funcionário:', codColigada);
+        
+        const candidatos = await votingService.obterCandidatos(codColigada);
 
         if (!isComponentMounted.current) {
           return;
@@ -90,7 +100,15 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
     setIsFetchingCandidate(true);
 
     try {
-      const candidato = await votingService.buscarCandidato(number);
+      // Obter CODCOLIGADA do funcionário atual
+      const funcionarioAtual = votingService.obterFuncionarioAtual();
+      const codColigada = funcionarioAtual?.CODCOLIGADA;
+      
+      if (!codColigada) {
+        throw new Error('CODCOLIGADA do funcionário não encontrada');
+      }
+      
+      const candidato = await votingService.buscarCandidato(number, codColigada);
       if (!candidato) return null;
 
       return {

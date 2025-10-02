@@ -113,10 +113,17 @@ const API_BASE_URL = 'https://totvs-tbc.jurunense.com';
 const AUTH_TOKEN = 'QUxFU1NBTkRSTzo1MTY3NDY0NTI4NzoxNzU2NTU2NTI5OTYyOjBmOGIxOTdmNGM0YWVkNzNkYzdiZjY5NGM0OWRjNWQ1Mzc5ZGNiZTgwYzc1YTZmMDI5MjIyNmZmYThiOTIzOGY=';
 const API_CONTEXT = 'CODSISTEMA=G;CODCOLIGADA=1;CODUSUARIO=ALESSANDRO';
 
+// Mapeamento de CODCOLIGADA para CODCOMISSAO
+const MAPEAMENTO_COLIGADA_COMISSAO = {
+  '1': '03',
+  '2': '202503', 
+  '3': '03',
+  '4': '03'
+} as const;
+
 const DATA_SERVER_CONFIG = {
   candidatos: {
-    nome: 'SmtCandidatosCipaData',
-    filtro: "CODCOMISSAO='202503'"
+    nome: 'SmtCandidatosCipaData'
   }
 } as const;
 
@@ -138,14 +145,12 @@ class VotingService {
   private funcionarioAtual: Funcionario | null = null;
 
   constructor() {
-    if (typeof window !== 'undefined') {
-      this.iniciarCarregamentoCandidatos();
-    }
+    // Não carrega candidatos no construtor - será carregado quando necessário com CODCOLIGADA
   }
 
-  private iniciarCarregamentoCandidatos(): void {
+  private iniciarCarregamentoCandidatos(codColigada: string): void {
     if (!this.carregamentoCandidatos) {
-      this.carregamentoCandidatos = this.carregarCandidatosDaAPI()
+      this.carregamentoCandidatos = this.carregarCandidatosDaAPI(codColigada)
         .catch(error => {
           console.error('💥 [VOTING SERVICE] Falha ao carregar candidatos na inicialização:', error);
         })
@@ -155,12 +160,16 @@ class VotingService {
     }
   }
 
-  private async garantirCandidatosCarregados(): Promise<void> {
+  private async garantirCandidatosCarregados(codColigada: string): Promise<void> {
     if (this.candidatosCarregados) {
       return;
     }
 
-    this.iniciarCarregamentoCandidatos();
+    if (!codColigada) {
+      throw new Error('CODCOLIGADA é obrigatória para carregar candidatos');
+    }
+
+    this.iniciarCarregamentoCandidatos(codColigada);
 
     if (this.carregamentoCandidatos) {
       await this.carregamentoCandidatos;
@@ -186,12 +195,18 @@ class VotingService {
     };
   }
 
-  private async carregarCandidatosDaAPI(): Promise<void> {
+  private async carregarCandidatosDaAPI(codColigada: string): Promise<void> {
     console.log('🌐 [VOTING SERVICE] Carregando candidatos da API...');
+
+    if (!codColigada) {
+      throw new Error('CODCOLIGADA é obrigatória para carregar candidatos');
+    }
+
+    const filtro = this.gerarFiltroCandidatos(codColigada);
 
     const payload = {
       DataServerName: DATA_SERVER_CONFIG.candidatos.nome,
-      Filtro: DATA_SERVER_CONFIG.candidatos.filtro,
+      Filtro: filtro,
       Contexto: API_CONTEXT
     };
 
@@ -232,14 +247,14 @@ class VotingService {
     }
   }
 
-  async obterCandidatos(): Promise<Candidato[]> {
-    await this.garantirCandidatosCarregados();
+  async obterCandidatos(codColigada: string): Promise<Candidato[]> {
+    await this.garantirCandidatosCarregados(codColigada);
     return this.candidatos;
   }
 
-  async atualizarCandidatos(): Promise<Candidato[]> {
+  async atualizarCandidatos(codColigada: string): Promise<Candidato[]> {
     this.candidatosCarregados = false;
-    await this.carregarCandidatosDaAPI();
+    await this.carregarCandidatosDaAPI(codColigada);
     return this.candidatos;
   }
 
@@ -276,7 +291,7 @@ class VotingService {
 
     try {
       // Buscar dados completos do candidato na API para obter CODPESSOA
-      const candidatosAPI = await this.buscarCandidatosCompletosDaAPI();
+      const candidatosAPI = await this.buscarCandidatosCompletosDaAPI(funcionarioParaVoto.CODCOLIGADA);
       const candidatoCompleto = candidatosAPI.find(c => c.CHAPA === candidato.codigo);
       
       if (!candidatoCompleto) {
@@ -340,12 +355,34 @@ class VotingService {
   }
 
   /**
+   * Gera filtro dinâmico baseado na CODCOLIGADA
+   */
+  private gerarFiltroCandidatos(codColigada: string): string {
+    const codComissao = MAPEAMENTO_COLIGADA_COMISSAO[codColigada as keyof typeof MAPEAMENTO_COLIGADA_COMISSAO];
+    
+    if (!codComissao) {
+      throw new Error(`CODCOLIGADA ${codColigada} não está mapeada. CODCOLIGADAs válidas: ${Object.keys(MAPEAMENTO_COLIGADA_COMISSAO).join(', ')}`);
+    }
+    
+    const filtro = `CODCOMISSAO='${codComissao}' AND CODCOLIGADA='${codColigada}'`;
+    console.log(`🔍 [VOTING SERVICE] Filtro gerado para CODCOLIGADA ${codColigada}:`, filtro);
+    
+    return filtro;
+  }
+
+  /**
    * Busca candidatos completos da API (incluindo CODPESSOA)
    */
-  private async buscarCandidatosCompletosDaAPI(): Promise<CandidatoAPI[]> {
+  private async buscarCandidatosCompletosDaAPI(codColigada: string): Promise<CandidatoAPI[]> {
+    if (!codColigada) {
+      throw new Error('CODCOLIGADA é obrigatória para buscar candidatos');
+    }
+
+    const filtro = this.gerarFiltroCandidatos(codColigada);
+    
     const payload = {
       DataServerName: DATA_SERVER_CONFIG.candidatos.nome,
-      Filtro: DATA_SERVER_CONFIG.candidatos.filtro,
+      Filtro: filtro,
       Contexto: API_CONTEXT
     };
 
@@ -643,9 +680,9 @@ class VotingService {
   /**
    * Busca candidato pelo código
    */
-  async buscarCandidato(codigo: string): Promise<Candidato | null> {
+  async buscarCandidato(codigo: string, codColigada: string): Promise<Candidato | null> {
     console.log('🎯 [VOTING SERVICE] Buscando candidato com código:', codigo);
-    await this.garantirCandidatosCarregados();
+    await this.garantirCandidatosCarregados(codColigada);
     const candidato = this.candidatos.find(c => c.codigo === codigo) || null;
     
     if (candidato) {
@@ -678,7 +715,8 @@ class VotingService {
 
       // Valida candidato
       console.log('🎯 [VOTING SERVICE] Buscando candidato...');
-      const candidato = await this.buscarCandidato(codigoCandidato);
+      const funcionario = validacao.funcionario!;
+      const candidato = await this.buscarCandidato(codigoCandidato, funcionario.CODCOLIGADA);
       if (!candidato) {
         console.log('❌ [VOTING SERVICE] Candidato não encontrado:', codigoCandidato);
         return { success: false, message: 'Candidato não encontrado' };
