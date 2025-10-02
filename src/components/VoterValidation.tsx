@@ -119,6 +119,12 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
         }
         
         console.log('✅ [VOTER VALIDATION] Validação completa, prosseguindo para votação');
+        
+        // Definir o funcionário atual no serviço para uso posterior
+        if (result.funcionario) {
+          votingService.definirFuncionarioAtual(result.funcionario);
+        }
+        
         playConfirmSound();
         onValidationSuccess(cpf, birthDate);
       } catch (error) {

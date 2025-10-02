@@ -78,6 +78,20 @@ export interface Candidato {
   foto?: string;
 }
 
+export interface PayloadVoto {
+  CODCOLIGADA: string;
+  CODCOMISSAO: string;
+  CODELEICAO: string;
+  CODVOTO: string;
+  CODCANDIDATO: string;
+  CODUSUARIO: string;
+  DATA: string;
+  VOTOS: string;
+  JUSTIFICATIVA: string;
+  NOMEUSUARIO: string;
+  EMBRANCO: string;
+}
+
 interface CandidatoAPI {
   CHAPA: string;
   NOME: string;
@@ -121,6 +135,7 @@ class VotingService {
   private candidatos: Candidato[] = [];
   private candidatosCarregados = false;
   private carregamentoCandidatos: Promise<void> | null = null;
+  private funcionarioAtual: Funcionario | null = null;
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -226,6 +241,122 @@ class VotingService {
     this.candidatosCarregados = false;
     await this.carregarCandidatosDaAPI();
     return this.candidatos;
+  }
+
+  /**
+   * Define o funcionário atual (após validação)
+   */
+  definirFuncionarioAtual(funcionario: Funcionario): void {
+    this.funcionarioAtual = funcionario;
+    console.log('👤 [VOTING SERVICE] Funcionário atual definido:', funcionario.NOME);
+  }
+
+  /**
+   * Obtém o funcionário atual
+   */
+  obterFuncionarioAtual(): Funcionario | null {
+    return this.funcionarioAtual;
+  }
+
+  /**
+   * Envia voto para a API
+   */
+  async enviarVoto(candidato: Candidato, funcionario?: Funcionario): Promise<{ success: boolean; message: string }> {
+    console.log('🗳️ [VOTING SERVICE] Enviando voto...');
+    
+    // Usar funcionário fornecido ou o funcionário atual
+    const funcionarioParaVoto = funcionario || this.funcionarioAtual;
+    
+    if (!funcionarioParaVoto) {
+      throw new Error('Funcionário não encontrado para registro do voto');
+    }
+    
+    console.log('👤 [VOTING SERVICE] Funcionário:', funcionarioParaVoto.NOME);
+    console.log('🎯 [VOTING SERVICE] Candidato:', candidato.nome);
+
+    try {
+      // Buscar dados completos do candidato na API para obter CODPESSOA
+      const candidatosAPI = await this.buscarCandidatosCompletosDaAPI();
+      const candidatoCompleto = candidatosAPI.find(c => c.CHAPA === candidato.codigo);
+      
+      if (!candidatoCompleto) {
+        throw new Error('Candidato não encontrado na API');
+      }
+
+      // Gerar CODVOTO único (timestamp)
+      const codVoto = Date.now().toString();
+      
+      // Data atual no formato ISO
+      const dataAtual = new Date().toISOString();
+
+      const payload: PayloadVoto = {
+        CODCOLIGADA: funcionarioParaVoto.CODCOLIGADA || '2',
+        CODCOMISSAO: '202503',
+        CODELEICAO: '092025',
+        CODVOTO: codVoto,
+        CODCANDIDATO: candidatoCompleto.CODPESSOA || candidato.codigo, // Usando CODPESSOA do candidato
+        CODUSUARIO: funcionarioParaVoto.CODPESSOA || 'alessandro',
+        DATA: dataAtual,
+        VOTOS: '1',
+        JUSTIFICATIVA: 'MANUAL',
+        NOMEUSUARIO: funcionarioParaVoto.NOME || 'Alessandro Gonçalves',
+        EMBRANCO: 'false'
+      };
+
+      console.log('📤 [VOTING SERVICE] Payload do voto:', JSON.stringify(payload, null, 2));
+
+      // Chamada real para o endpoint de inclusão do voto
+      console.log('🌐 [VOTING SERVICE] Enviando voto para API...');
+      console.log('🔗 [VOTING SERVICE] URL:', `${API_BASE_URL}/data-server/incluir-voto`);
+      
+      const response = await apiClient.post('/data-server/incluir-voto', JSON.stringify(payload));
+      
+      console.log('📥 [VOTING SERVICE] Resposta da API recebida');
+      console.log('📊 [VOTING SERVICE] Status:', response.status);
+      console.log('📋 [VOTING SERVICE] Dados:', JSON.stringify(response.data, null, 2));
+
+      const resultado = response.data;
+
+      if (!resultado?.success) {
+        const mensagem = resultado?.message || 'Resposta da API sem sucesso';
+        console.error('❌ [VOTING SERVICE] API de voto retornou erro:', mensagem);
+        throw new Error(mensagem);
+      }
+
+      console.log('✅ [VOTING SERVICE] Voto enviado com sucesso');
+      
+      return {
+        success: true,
+        message: resultado.message || 'Voto registrado com sucesso'
+      };
+
+    } catch (error) {
+      console.error('💥 [VOTING SERVICE] Erro ao enviar voto:', error);
+      return {
+        success: false,
+        message: 'Erro ao registrar voto'
+      };
+    }
+  }
+
+  /**
+   * Busca candidatos completos da API (incluindo CODPESSOA)
+   */
+  private async buscarCandidatosCompletosDaAPI(): Promise<CandidatoAPI[]> {
+    const payload = {
+      DataServerName: DATA_SERVER_CONFIG.candidatos.nome,
+      Filtro: DATA_SERVER_CONFIG.candidatos.filtro,
+      Contexto: API_CONTEXT
+    };
+
+    const response = await apiClient.post('/data-server/read-view', JSON.stringify(payload));
+    const resultado = response.data;
+
+    if (!resultado?.success) {
+      throw new Error('Erro ao buscar candidatos completos');
+    }
+
+    return resultado?.data?.VCANDIDATOSCIPA || [];
   }
 
   /**

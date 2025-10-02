@@ -175,24 +175,33 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
     try {
       playFinalizarSound();
       
-      // Usa o CPF do eleitor validado
-      const cpf = voterCPF || '51674645287'; // Fallback para teste
-      console.log('🗳️ [VOTING INTERFACE] Iniciando registro de voto...');
-      console.log('📝 [VOTING INTERFACE] CPF:', cpf);
-      console.log('🎯 [VOTING INTERFACE] Candidato:', candidateNumber);
+      console.log('🗳️ [VOTING INTERFACE] Iniciando envio de voto...');
+      console.log('🎯 [VOTING INTERFACE] Candidato selecionado:', selectedCandidate);
       
-      const result = await votingService.registrarVoto(cpf, candidateNumber);
+      if (!selectedCandidate) {
+        throw new Error('Nenhum candidato selecionado');
+      }
+      
+      // Converter o candidato selecionado para o formato Candidato do serviço
+      const candidatoParaVoto = {
+        codigo: selectedCandidate.number,
+        nome: selectedCandidate.name,
+        departamento: selectedCandidate.department,
+        foto: selectedCandidate.photo
+      };
+      
+      const result = await votingService.enviarVoto(candidatoParaVoto);
       
       if (result.success) {
-        console.log('✅ [VOTING INTERFACE] Voto registrado com sucesso:', result.voto);
+        console.log('✅ [VOTING INTERFACE] Voto enviado com sucesso');
         onVoteConfirm(candidateNumber);
       } else {
-        console.error('❌ [VOTING INTERFACE] Erro ao registrar voto:', result.message);
+        console.error('❌ [VOTING INTERFACE] Erro ao enviar voto:', result.message);
         // Aqui você pode mostrar uma mensagem de erro para o usuário
         onVoteConfirm(candidateNumber); // Por enquanto, continua o fluxo
       }
     } catch (error) {
-      console.error('💥 [VOTING INTERFACE] Erro ao registrar voto:', error);
+      console.error('💥 [VOTING INTERFACE] Erro ao enviar voto:', error);
       onVoteConfirm(candidateNumber);
     } finally {
       setIsLoading(false);
