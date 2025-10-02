@@ -161,7 +161,7 @@ class VotingService {
       return null;
     }
 
-    const departamento = candidato.DEPARTAMENTO?.trim() || candidato.DESCORIGEM?.trim() || 'Não informado';
+    const departamento = candidato.DEPARTAMENTO?.trim() || candidato.CODPESSOA?.trim() || 'Não informado';
 
     return {
       codigo,
