@@ -7,8 +7,30 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*', // Permitir qualquer origem
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: false
+}));
 app.use(express.json());
+
+// Middleware CORS mais robusto
+app.use((req, res, next) => {
+  // Permitir qualquer origem
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Allow-Credentials', 'false');
+  
+  // Se for uma requisição OPTIONS, responder imediatamente
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+    return;
+  }
+  
+  next();
+});
 
 // Configuração do banco de dados MSSQL
 const dbConfig = {
@@ -61,6 +83,11 @@ async function initializeDatabase() {
 
 // Endpoint para inserir voto
 app.post('/data-server/incluir-voto', async (req, res) => {
+  // Headers CORS
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  
   console.log('🗳️ [BACKEND] ===== RECEBENDO VOTO =====');
   console.log('📝 [BACKEND] Dados recebidos:', JSON.stringify(req.body, null, 2));
 
@@ -208,6 +235,11 @@ app.post('/data-server/incluir-voto', async (req, res) => {
 
 // Endpoint para testar conexão
 app.get('/data-server/health', async (req, res) => {
+  // Headers CORS
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  
   try {
     if (!pool) {
       throw new Error('Pool de conexão não disponível');
@@ -234,6 +266,11 @@ app.get('/data-server/health', async (req, res) => {
 
 // Endpoint para verificar tabela
 app.get('/data-server/verificar-tabela', async (req, res) => {
+  // Headers CORS
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  
   try {
     if (!pool) {
       throw new Error('Pool de conexão não disponível');

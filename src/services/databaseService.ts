@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 // Configuração da API para operações de banco de dados
-const API_BASE_URL = 'http://localhost:3001'; // Backend local
+// Detectar se está rodando localmente ou em servidor
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_BASE_URL = isLocalhost ? 'http://localhost:3001' : `http://${window.location.hostname}:3001`;
 const AUTH_TOKEN = 'QUxFU1NBTkRSTzo1MTY3NDY0NTI4NzoxNzU2NTU2NTI5OTYyOjBmOGIxOTdmNGM0YWVkNzNkYzdiZjY5NGM0OWRjNWQ1Mzc5ZGNiZTgwYzc1YTZmMDI5MjIyNmZmYThiOTIzOGY=';
 
 // Instância do axios configurada para operações de banco
@@ -13,6 +15,12 @@ const apiClient = axios.create({
   },
   timeout: 30000
 });
+
+// Log da configuração
+console.log('🌐 [DATABASE SERVICE] Configuração da API:');
+console.log('🌐 [DATABASE SERVICE] Hostname:', window.location.hostname);
+console.log('🌐 [DATABASE SERVICE] É localhost:', isLocalhost);
+console.log('🌐 [DATABASE SERVICE] API_BASE_URL:', API_BASE_URL);
 
 /**
  * Serviço para operações de banco de dados via API
