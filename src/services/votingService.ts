@@ -359,8 +359,8 @@ class VotingService {
       console.log('📝 [VOTING SERVICE] Montando payload do voto...');
       const payload: PayloadVoto = {
         CODCOLIGADA: funcionarioParaVoto.CODCOLIGADA || '2',
-        CODCOMISSAO: '202503',
-        CODELEICAO: '092025',
+        CODCOMISSAO: candidatoCompleto.CODCOMISSAO || '03', // Usando CODCOMISSAO do candidato
+        CODELEICAO: candidatoCompleto.CODELEICAO || '03', // Usando CODELEICAO do candidato
         CODVOTO: codVoto,
         CODCANDIDATO: candidatoCompleto.CODPESSOA || candidato.codigo, // Usando CODPESSOA do candidato
         CODUSUARIO: funcionarioParaVoto.CODPESSOA || 'alessandro',
