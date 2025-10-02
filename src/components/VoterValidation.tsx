@@ -7,15 +7,34 @@ import { votingService } from "@/services/votingService";
 
 interface VoterValidationProps {
   onValidationSuccess: (cpf: string, birthDate: string) => void;
+  onCancel?: () => void;
 }
 
-export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) => {
+export const VoterValidation = ({ onValidationSuccess, onCancel }: VoterValidationProps) => {
   const [currentField, setCurrentField] = useState<'cpf' | 'birthDate'>('cpf');
   const [cpf, setCpf] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { playErrorSound, playConfirmSound } = useUrnaAudio();
+
+  const resetarValidacao = () => {
+    console.log('🔄 [VOTER VALIDATION] Resetando validação...');
+    setCurrentField('cpf');
+    setCpf('');
+    setBirthDate('');
+    setError('');
+    setIsLoading(false);
+    console.log('✅ [VOTER VALIDATION] Validação resetada');
+  };
+
+  const handleCancel = () => {
+    console.log('❌ [VOTER VALIDATION] Cancelando validação...');
+    resetarValidacao();
+    if (onCancel) {
+      onCancel();
+    }
+  };
 
   const formatCPF = (value: string) => {
     // Remove tudo que não for número
@@ -197,7 +216,17 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
               {currentField === 'cpf' ? (
                 <p>Digite apenas os números do seu CPF</p>
               ) : (
-                <p>Digite sua data de nascimento no formato DD/MM/AAAA</p>
+                <div className="space-y-2">
+                  <p>Digite sua data de nascimento no formato DD/MM/AAAA</p>
+                  {onCancel && (
+                    <button
+                      onClick={handleCancel}
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-semibold transition-colors"
+                    >
+                      CANCELAR
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>
