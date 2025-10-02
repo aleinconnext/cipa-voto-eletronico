@@ -5,9 +5,10 @@ import { useUrnaAudio } from "@/hooks/useUrnaAudio";
 
 interface VoteSuccessProps {
   onNewVoter: () => void;
+  onCancel?: () => void;
 }
 
-export const VoteSuccess = ({ onNewVoter }: VoteSuccessProps) => {
+export const VoteSuccess = ({ onNewVoter, onCancel }: VoteSuccessProps) => {
   const { playSuccessSound } = useUrnaAudio();
 
   useEffect(() => {
@@ -76,8 +77,16 @@ export const VoteSuccess = ({ onNewVoter }: VoteSuccessProps) => {
           </div>
 
           {/* Mensagem de retorno */}
-          <div className="text-gray-400 text-sm">
+          <div className="text-gray-400 text-sm space-y-2">
             <p>Retornando à tela inicial em alguns segundos...</p>
+            {onCancel && (
+              <button
+                onClick={onCancel}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-semibold transition-colors"
+              >
+                CANCELAR
+              </button>
+            )}
           </div>
         </div>
       </UrnaScreen>

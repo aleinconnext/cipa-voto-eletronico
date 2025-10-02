@@ -13,10 +13,11 @@ import { Users } from "lucide-react";
 interface VotingInterfaceProps {
   onVoteConfirm: (candidateNumber: string) => void;
   onBack: () => void;
+  onCancel?: () => void;
   voterCPF?: string;
 }
 
-export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInterfaceProps) => {
+export const VotingInterface = ({ onVoteConfirm, onBack, onCancel, voterCPF }: VotingInterfaceProps) => {
   const DEFAULT_MAX_DIGITS = 10;
   const DEFAULT_MIN_DIGITS = 1;
 
@@ -42,7 +43,14 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
       try {
         // Obter CODCOLIGADA do funcionário atual
         const funcionarioAtual = votingService.obterFuncionarioAtual();
-        const codColigada = funcionarioAtual?.CODCOLIGADA;
+        
+        // Verificar se há funcionário atual antes de continuar
+        if (!funcionarioAtual) {
+          console.log('⚠️ [VOTING INTERFACE] Nenhum funcionário atual encontrado, pulando configuração de candidatos');
+          return;
+        }
+        
+        const codColigada = funcionarioAtual.CODCOLIGADA;
         
         if (!codColigada) {
           throw new Error('CODCOLIGADA do funcionário não encontrada');
@@ -191,12 +199,42 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
     console.log('🔄 [VOTING INTERFACE] Resetando interface...');
     setCandidateNumber('');
     setSelectedCandidate(null);
+    setShowConfirmation(false);
+    setIsLoading(false);
+    setIsFetchingCandidate(false);
+    setCandidateError(false);
+    setMaxDigits(DEFAULT_MAX_DIGITS);
+    setMinDigitsForLookup(DEFAULT_MIN_DIGITS);
     setCandidatesList([]);
     setIsModalOpen(false);
-    setIsFetchingCandidate(false);
-    setCandidateError(null);
-    setLastSearchRef('');
+    lastRequestIdRef.current = 0;
+    lastSearchRef.current = '';
     console.log('✅ [VOTING INTERFACE] Interface resetada');
+  };
+
+  const handleCancel = () => {
+    console.log('❌ [VOTING INTERFACE] ===== CANCELANDO VOTAÇÃO =====');
+    console.log('🔍 [VOTING INTERFACE] Estado antes do cancelamento:');
+    console.log('🔍 [VOTING INTERFACE] - candidateNumber:', candidateNumber);
+    console.log('🔍 [VOTING INTERFACE] - selectedCandidate:', selectedCandidate ? 'EXISTE' : 'NULL');
+    console.log('🔍 [VOTING INTERFACE] - showConfirmation:', showConfirmation);
+    console.log('🔍 [VOTING INTERFACE] - candidatesList.length:', candidatesList.length);
+    
+    // Primeiro limpar dados do serviço
+    console.log('🧹 [VOTING INTERFACE] Limpando dados do serviço...');
+    votingService.limparDadosAposVotacao();
+    
+    // Depois resetar interface
+    console.log('🔄 [VOTING INTERFACE] Resetando interface...');
+    resetarInterface();
+    
+    // Por último chamar callback do pai
+    console.log('📞 [VOTING INTERFACE] Chamando callback do pai...');
+    if (onCancel) {
+      onCancel();
+    }
+    
+    console.log('✅ [VOTING INTERFACE] ===== CANCELAMENTO CONCLUÍDO =====');
   };
 
   const handleFinalizar = async () => {
@@ -464,6 +502,16 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
               <p>• Use CORRIGE para apagar</p>
               <p>• Use CONFIRMA para votar</p>
               <p>• Clique em "Ver Candidatos" para ver a lista completa</p>
+              {onCancel && (
+                <div className="pt-2">
+                  <button
+                    onClick={handleCancel}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-semibold transition-colors"
+                  >
+                    CANCELAR
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

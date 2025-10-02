@@ -311,6 +311,11 @@ class VotingService {
    */
   limparDadosAposVotacao(): void {
     console.log('🧹 [VOTING SERVICE] ===== LIMPANDO DADOS APÓS VOTAÇÃO =====');
+    console.log('🔍 [VOTING SERVICE] Estado antes da limpeza:');
+    console.log('🔍 [VOTING SERVICE] - funcionarioAtual:', this.funcionarioAtual ? 'EXISTE' : 'NULL');
+    console.log('🔍 [VOTING SERVICE] - candidatos.length:', this.candidatos.length);
+    console.log('🔍 [VOTING SERVICE] - candidatosCarregados:', this.candidatosCarregados);
+    console.log('🔍 [VOTING SERVICE] - votos.length:', this.votos.length);
     
     // Limpar funcionário atual
     this.funcionarioAtual = null;
@@ -325,6 +330,12 @@ class VotingService {
     // Limpar votos registrados
     this.votos = [];
     console.log('🗳️ [VOTING SERVICE] Lista de votos limpa');
+    
+    console.log('🔍 [VOTING SERVICE] Estado após limpeza:');
+    console.log('🔍 [VOTING SERVICE] - funcionarioAtual:', this.funcionarioAtual ? 'EXISTE' : 'NULL');
+    console.log('🔍 [VOTING SERVICE] - candidatos.length:', this.candidatos.length);
+    console.log('🔍 [VOTING SERVICE] - candidatosCarregados:', this.candidatosCarregados);
+    console.log('🔍 [VOTING SERVICE] - votos.length:', this.votos.length);
     
     console.log('✅ [VOTING SERVICE] ===== LIMPEZA COMPLETA REALIZADA =====');
   }

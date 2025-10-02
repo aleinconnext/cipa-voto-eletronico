@@ -35,16 +35,30 @@ export const UrnaEletronica = () => {
     console.log('✅ [URNA ELETRONICA] Sistema resetado para novo eleitor');
   };
 
+  const handleCancel = () => {
+    console.log('❌ [URNA ELETRONICA] Cancelando operação...');
+    
+    // Limpar dados do serviço
+    votingService.limparDadosAposVotacao();
+    
+    // Resetar estado da urna
+    setCurrentStep('validation');
+    setVoterCPF('');
+    setVoterBirthDate('');
+    
+    console.log('✅ [URNA ELETRONICA] Sistema cancelado e resetado');
+  };
+
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 'validation':
-        return <VoterValidation onValidationSuccess={handleValidationSuccess} />;
+        return <VoterValidation onValidationSuccess={handleValidationSuccess} onCancel={handleCancel} />;
       case 'voting':
-        return <VotingInterface onVoteConfirm={handleVoteConfirm} onBack={handleNewVoter} voterCPF={voterCPF} />;
+        return <VotingInterface onVoteConfirm={handleVoteConfirm} onBack={handleNewVoter} onCancel={handleCancel} voterCPF={voterCPF} />;
       case 'success':
-        return <VoteSuccess onNewVoter={handleNewVoter} />;
+        return <VoteSuccess onNewVoter={handleNewVoter} onCancel={handleCancel} />;
       default:
-        return <VoterValidation onValidationSuccess={handleValidationSuccess} />;
+        return <VoterValidation onValidationSuccess={handleValidationSuccess} onCancel={handleCancel} />;
     }
   };
 
