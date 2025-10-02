@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Urna Eletrônica CIPA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #131D52, #FE3B1F);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .status {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        .button {
+            background: #FE3B1F;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .button:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Urna Eletrônica CIPA</h1>
+        <p>Sistema de Votação Eletrônica 2025</p>
+        
+        <div class="status">
+            ✅ Servidor funcionando corretamente!
+        </div>
+        
+        <div class="info">
+            <strong>Status:</strong> Online<br>
+            <strong>Porta:</strong> 5173<br>
+            <strong>URL:</strong> http://localhost:5173<br>
+            <strong>Data:</strong> <span id="datetime"></span>
+        </div>
+        
+        <a href="/" class="button">🏠 Página Principal</a>
+        <a href="/admin" class="button">⚙️ Administração</a>
+        
+        <div class="info" style="margin-top: 30px;">
+            <strong>Se você está vendo esta página:</strong><br>
+            • O servidor está funcionando ✅<br>
+            • A porta 5173 está ativa ✅<br>
+            • O problema pode ser com o React Router<br>
+            • Tente acessar diretamente: <a href="/" style="color: #FE3B1F;">http://localhost:5173/</a>
+        </div>
+    </div>
+    
+    <script>
+        // Atualizar data e hora
+        function updateDateTime() {
+            const now = new Date();
+            const datetime = now.toLocaleString('pt-BR');
+            document.getElementById('datetime').textContent = datetime;
+        }
+        
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        
+        // Log para debug
+        console.log('🎯 [TESTE] Página de teste carregada com sucesso!');
+        console.log('🌐 [TESTE] URL atual:', window.location.href);
+        console.log('📅 [TESTE] Timestamp:', new Date().toISOString());
+    </script>
+</body>
+</html>
