@@ -307,6 +307,60 @@ class VotingService {
   }
 
   /**
+   * Limpa todos os dados após votação finalizada
+   */
+  limparDadosAposVotacao(): void {
+    console.log('🧹 [VOTING SERVICE] ===== LIMPANDO DADOS APÓS VOTAÇÃO =====');
+    console.log('🔍 [VOTING SERVICE] Estado antes da limpeza:');
+    console.log('🔍 [VOTING SERVICE] - funcionarioAtual:', this.funcionarioAtual ? 'EXISTE' : 'NULL');
+    console.log('🔍 [VOTING SERVICE] - candidatos.length:', this.candidatos.length);
+    console.log('🔍 [VOTING SERVICE] - candidatosCarregados:', this.candidatosCarregados);
+    console.log('🔍 [VOTING SERVICE] - votos.length:', this.votos.length);
+    
+    // Limpar funcionário atual
+    this.funcionarioAtual = null;
+    console.log('👤 [VOTING SERVICE] Funcionário atual limpo');
+    
+    // Limpar cache de candidatos
+    this.candidatos = [];
+    this.candidatosCarregados = false;
+    this.carregamentoCandidatos = null;
+    console.log('🎯 [VOTING SERVICE] Cache de candidatos limpo');
+    
+    // Limpar votos registrados
+    this.votos = [];
+    console.log('🗳️ [VOTING SERVICE] Lista de votos limpa');
+    
+    console.log('🔍 [VOTING SERVICE] Estado após limpeza:');
+    console.log('🔍 [VOTING SERVICE] - funcionarioAtual:', this.funcionarioAtual ? 'EXISTE' : 'NULL');
+    console.log('🔍 [VOTING SERVICE] - candidatos.length:', this.candidatos.length);
+    console.log('🔍 [VOTING SERVICE] - candidatosCarregados:', this.candidatosCarregados);
+    console.log('🔍 [VOTING SERVICE] - votos.length:', this.votos.length);
+    
+    console.log('✅ [VOTING SERVICE] ===== LIMPEZA COMPLETA REALIZADA =====');
+  }
+
+  /**
+   * Limpa apenas os dados do funcionário atual
+   */
+  limparFuncionarioAtual(): void {
+    console.log('👤 [VOTING SERVICE] Limpando dados do funcionário atual...');
+    this.funcionarioAtual = null;
+    console.log('✅ [VOTING SERVICE] Funcionário atual limpo');
+  }
+
+  /**
+   * Limpa apenas o cache de candidatos
+   */
+  limparCacheCandidatos(): void {
+    console.log('🎯 [VOTING SERVICE] Limpando cache de candidatos...');
+    this.candidatos = [];
+    this.candidatosCarregados = false;
+    this.carregamentoCandidatos = null;
+    console.log('✅ [VOTING SERVICE] Cache de candidatos limpo');
+  }
+
+  /**
    * Envia voto para a API
    */
   async enviarVoto(candidato: Candidato, funcionario?: Funcionario): Promise<{ success: boolean; message: string }> {
@@ -410,6 +464,9 @@ class VotingService {
       console.log('✅ [VOTING SERVICE] Voto inserido com sucesso no banco de dados!');
       console.log('🎯 [VOTING SERVICE] CODVOTO gerado:', resultado.codVoto);
       console.log('🗳️ [VOTING SERVICE] ===== PROCESSO DE VOTO CONCLUÍDO COM SUCESSO =====');
+      
+      // Limpar todos os dados após votação bem-sucedida
+      this.limparDadosAposVotacao();
       
       return {
         success: true,
