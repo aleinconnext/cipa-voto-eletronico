@@ -67,7 +67,7 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
           name: candidato.nome,
           position: 'Representante CIPA',
           department: candidato.departamento,
-          photo: candidato.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(candidato.nome)}&background=131D52&color=fff&size=100`
+          photo: candidato.foto || `/fotos/${candidato.codigo}.jpg`
         }));
 
         setCandidatesList(candidatosMapeados);
@@ -99,7 +99,7 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
         name: candidato.nome,
         position: 'Representante CIPA',
         department: candidato.departamento,
-        photo: candidato.foto
+        photo: candidato.foto || `/fotos/${candidato.codigo}.jpg`
       };
     } finally {
       if (lastRequestIdRef.current === currentRequestId) {
@@ -215,6 +215,11 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
                     src={selectedCandidate.photo} 
                     alt={selectedCandidate.name}
                     className="w-20 h-28 md:w-24 md:h-32 object-cover border-2 border-jurunense-secondary rounded"
+                    onError={(e) => {
+                      // Fallback para avatar gerado se a foto não existir
+                      const target = e.target as HTMLImageElement;
+                      target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCandidate.name)}&background=131D52&color=fff&size=100`;
+                    }}
                   />
                 )}
                 <div className="text-center md:text-left">
@@ -329,6 +334,11 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
                             src={candidate.photo} 
                             alt={candidate.name}
                             className="w-16 h-16 rounded-full object-cover border-2 border-jurunense-secondary"
+                            onError={(e) => {
+                              // Fallback para avatar gerado se a foto não existir
+                              const target = e.target as HTMLImageElement;
+                              target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(candidate.name)}&background=131D52&color=fff&size=100`;
+                            }}
                           />
                           <div>
                             <div className="text-lg font-bold text-jurunense-secondary mb-1">
@@ -374,6 +384,11 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
                       src={selectedCandidate.photo} 
                       alt={selectedCandidate.name}
                       className="w-16 h-24 md:w-20 md:h-28 object-cover border-2 border-jurunense-secondary rounded"
+                      onError={(e) => {
+                        // Fallback para avatar gerado se a foto não existir
+                        const target = e.target as HTMLImageElement;
+                        target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedCandidate.name)}&background=131D52&color=fff&size=100`;
+                      }}
                     />
                   )}
                   <div className="text-center md:text-left">
