@@ -3,6 +3,7 @@ import { VoterValidation } from "./VoterValidation";
 import { VotingInterface } from "./VotingInterface";
 import { VoteSuccess } from "./VoteSuccess";
 import { VotingStep } from "@/types/voting";
+import { votingService } from "@/services/votingService";
 import logoJurunense from "@/assets/logo-jurunense-desk.svg?url";
 
 export const UrnaEletronica = () => {
@@ -21,9 +22,17 @@ export const UrnaEletronica = () => {
   };
 
   const handleNewVoter = () => {
+    console.log('🔄 [URNA ELETRONICA] Iniciando novo eleitor...');
+    
+    // Limpar dados do serviço
+    votingService.limparDadosAposVotacao();
+    
+    // Resetar estado da urna
     setCurrentStep('validation');
     setVoterCPF('');
     setVoterBirthDate('');
+    
+    console.log('✅ [URNA ELETRONICA] Sistema resetado para novo eleitor');
   };
 
   const renderCurrentStep = () => {

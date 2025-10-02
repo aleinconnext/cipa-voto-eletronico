@@ -17,6 +17,16 @@ export const VoterValidation = ({ onValidationSuccess }: VoterValidationProps) =
   const [isLoading, setIsLoading] = useState(false);
   const { playErrorSound, playConfirmSound } = useUrnaAudio();
 
+  const resetarValidacao = () => {
+    console.log('🔄 [VOTER VALIDATION] Resetando validação...');
+    setCurrentField('cpf');
+    setCpf('');
+    setBirthDate('');
+    setError('');
+    setIsLoading(false);
+    console.log('✅ [VOTER VALIDATION] Validação resetada');
+  };
+
   const formatCPF = (value: string) => {
     // Remove tudo que não for número
     const numbers = value.replace(/\D/g, '');

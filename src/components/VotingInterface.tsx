@@ -187,6 +187,18 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
     }
   };
 
+  const resetarInterface = () => {
+    console.log('🔄 [VOTING INTERFACE] Resetando interface...');
+    setCandidateNumber('');
+    setSelectedCandidate(null);
+    setCandidatesList([]);
+    setIsModalOpen(false);
+    setIsFetchingCandidate(false);
+    setCandidateError(null);
+    setLastSearchRef('');
+    console.log('✅ [VOTING INTERFACE] Interface resetada');
+  };
+
   const handleFinalizar = async () => {
     setIsLoading(true);
     
@@ -212,6 +224,8 @@ export const VotingInterface = ({ onVoteConfirm, onBack, voterCPF }: VotingInter
       
       if (result.success) {
         console.log('✅ [VOTING INTERFACE] Voto enviado com sucesso');
+        // Resetar interface após votação bem-sucedida
+        resetarInterface();
         onVoteConfirm(candidateNumber);
       } else {
         console.error('❌ [VOTING INTERFACE] Erro ao enviar voto:', result.message);
