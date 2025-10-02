@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { databaseService } from './databaseService';
 
 // Interfaces para tipagem
 export interface Funcionario {
@@ -146,6 +147,22 @@ class VotingService {
 
   constructor() {
     // Não carrega candidatos no construtor - será carregado quando necessário com CODCOLIGADA
+    // Inicializar conexão com banco de dados
+    this.inicializarBancoDados();
+  }
+
+  /**
+   * Inicializa a conexão com o banco de dados
+   */
+  private async inicializarBancoDados(): Promise<void> {
+    try {
+      console.log('🔌 [VOTING SERVICE] Inicializando conexão com banco de dados...');
+      await databaseService.initialize();
+      console.log('✅ [VOTING SERVICE] Conexão com banco de dados inicializada');
+    } catch (error) {
+      console.error('💥 [VOTING SERVICE] Erro ao inicializar banco de dados:', error);
+      // Não falha a inicialização do serviço se o banco não estiver disponível
+    }
   }
 
   private iniciarCarregamentoCandidatos(codColigada: string): void {
@@ -274,40 +291,76 @@ class VotingService {
   }
 
   /**
+   * Testa a conexão com o banco de dados
+   */
+  async testarConexaoBanco(): Promise<{ success: boolean; message: string }> {
+    console.log('🧪 [VOTING SERVICE] Testando conexão com banco de dados...');
+    return await databaseService.testarConexao();
+  }
+
+  /**
+   * Verifica se a tabela de votos existe
+   */
+  async verificarTabelaVotos(): Promise<{ success: boolean; message: string; existe: boolean }> {
+    console.log('🔍 [VOTING SERVICE] Verificando tabela de votos...');
+    return await databaseService.verificarTabelaVotos();
+  }
+
+  /**
    * Envia voto para a API
    */
   async enviarVoto(candidato: Candidato, funcionario?: Funcionario): Promise<{ success: boolean; message: string }> {
+    console.log('🗳️ [VOTING SERVICE] ===== INICIANDO PROCESSO DE VOTO =====');
     console.log('🗳️ [VOTING SERVICE] Enviando voto...');
     
     // Usar funcionário fornecido ou o funcionário atual
     const funcionarioParaVoto = funcionario || this.funcionarioAtual;
     
     if (!funcionarioParaVoto) {
+      console.error('❌ [VOTING SERVICE] Funcionário não encontrado para registro do voto');
       throw new Error('Funcionário não encontrado para registro do voto');
     }
     
     console.log('👤 [VOTING SERVICE] Funcionário:', funcionarioParaVoto.NOME);
+    console.log('🏢 [VOTING SERVICE] CODCOLIGADA do funcionário:', funcionarioParaVoto.CODCOLIGADA);
     console.log('🎯 [VOTING SERVICE] Candidato:', candidato.nome);
+    console.log('🎯 [VOTING SERVICE] Código do candidato:', candidato.codigo);
 
     try {
       // Buscar dados completos do candidato na API para obter CODPESSOA
+      console.log('🔍 [VOTING SERVICE] Buscando dados completos do candidato na API...');
+      console.log('🔍 [VOTING SERVICE] CODCOLIGADA para busca:', funcionarioParaVoto.CODCOLIGADA);
+      
       const candidatosAPI = await this.buscarCandidatosCompletosDaAPI(funcionarioParaVoto.CODCOLIGADA);
+      console.log('📋 [VOTING SERVICE] Candidatos encontrados na API:', candidatosAPI.length);
+      
       const candidatoCompleto = candidatosAPI.find(c => c.CHAPA === candidato.codigo);
       
       if (!candidatoCompleto) {
+        console.error('❌ [VOTING SERVICE] Candidato não encontrado na API');
+        console.error('❌ [VOTING SERVICE] CHAPA buscada:', candidato.codigo);
+        console.error('❌ [VOTING SERVICE] CHAPAs disponíveis:', candidatosAPI.map(c => c.CHAPA));
         throw new Error('Candidato não encontrado na API');
       }
+      
+      console.log('✅ [VOTING SERVICE] Candidato encontrado na API:');
+      console.log('✅ [VOTING SERVICE] CHAPA:', candidatoCompleto.CHAPA);
+      console.log('✅ [VOTING SERVICE] NOME:', candidatoCompleto.NOME);
+      console.log('✅ [VOTING SERVICE] CODPESSOA:', candidatoCompleto.CODPESSOA);
 
       // Gerar CODVOTO único (timestamp)
       const codVoto = Date.now().toString();
+      console.log('🔢 [VOTING SERVICE] CODVOTO gerado:', codVoto);
       
       // Data atual no formato ISO
       const dataAtual = new Date().toISOString();
+      console.log('📅 [VOTING SERVICE] Data atual:', dataAtual);
 
+      console.log('📝 [VOTING SERVICE] Montando payload do voto...');
       const payload: PayloadVoto = {
         CODCOLIGADA: funcionarioParaVoto.CODCOLIGADA || '2',
-        CODCOMISSAO: '202503',
-        CODELEICAO: '092025',
+        CODCOMISSAO: candidatoCompleto.CODCOMISSAO || '03', // Usando CODCOMISSAO do candidato
+        CODELEICAO: candidatoCompleto.CODELEICAO || '03', // Usando CODELEICAO do candidato
         CODVOTO: codVoto,
         CODCANDIDATO: candidatoCompleto.CODPESSOA || candidato.codigo, // Usando CODPESSOA do candidato
         CODUSUARIO: funcionarioParaVoto.CODPESSOA || 'alessandro',
@@ -318,27 +371,45 @@ class VotingService {
         EMBRANCO: 'false'
       };
 
-      console.log('📤 [VOTING SERVICE] Payload do voto:', JSON.stringify(payload, null, 2));
+      console.log('📤 [VOTING SERVICE] Payload completo montado:');
+      console.log('📤 [VOTING SERVICE] CODCOLIGADA:', payload.CODCOLIGADA);
+      console.log('📤 [VOTING SERVICE] CODCOMISSAO:', payload.CODCOMISSAO);
+      console.log('📤 [VOTING SERVICE] CODELEICAO:', payload.CODELEICAO);
+      console.log('📤 [VOTING SERVICE] CODVOTO:', payload.CODVOTO);
+      console.log('📤 [VOTING SERVICE] CODCANDIDATO:', payload.CODCANDIDATO);
+      console.log('📤 [VOTING SERVICE] CODUSUARIO:', payload.CODUSUARIO);
+      console.log('📤 [VOTING SERVICE] DATA:', payload.DATA);
+      console.log('📤 [VOTING SERVICE] VOTOS:', payload.VOTOS);
+      console.log('📤 [VOTING SERVICE] JUSTIFICATIVA:', payload.JUSTIFICATIVA);
+      console.log('📤 [VOTING SERVICE] NOMEUSUARIO:', payload.NOMEUSUARIO);
+      console.log('📤 [VOTING SERVICE] EMBRANCO:', payload.EMBRANCO);
 
-      // Chamada real para o endpoint de inclusão do voto
-      console.log('🌐 [VOTING SERVICE] Enviando voto para API...');
-      console.log('🔗 [VOTING SERVICE] URL:', `${API_BASE_URL}/data-server/incluir-voto`);
+      // Inserir voto diretamente no banco de dados
+      console.log('🗳️ [VOTING SERVICE] Inserindo voto diretamente no banco de dados...');
       
-      const response = await apiClient.post('/data-server/incluir-voto', JSON.stringify(payload));
+      const dadosVoto = {
+        CODCOLIGADA: payload.CODCOLIGADA,
+        CODCOMISSAO: payload.CODCOMISSAO,
+        CODELEICAO: payload.CODELEICAO,
+        CODCANDIDATO: payload.CODCANDIDATO,
+        CODUSUARIO: payload.CODUSUARIO
+      };
+
+      console.log('📊 [VOTING SERVICE] Dados para inserção:', JSON.stringify(dadosVoto, null, 2));
+
+      const resultado = await databaseService.inserirVoto(dadosVoto);
       
-      console.log('📥 [VOTING SERVICE] Resposta da API recebida');
-      console.log('📊 [VOTING SERVICE] Status:', response.status);
-      console.log('📋 [VOTING SERVICE] Dados:', JSON.stringify(response.data, null, 2));
+      console.log('📥 [VOTING SERVICE] Resultado da inserção:', JSON.stringify(resultado, null, 2));
 
-      const resultado = response.data;
-
-      if (!resultado?.success) {
-        const mensagem = resultado?.message || 'Resposta da API sem sucesso';
-        console.error('❌ [VOTING SERVICE] API de voto retornou erro:', mensagem);
+      if (!resultado.success) {
+        const mensagem = resultado.message || 'Erro ao inserir voto no banco';
+        console.error('❌ [VOTING SERVICE] Erro na inserção:', mensagem);
         throw new Error(mensagem);
       }
 
-      console.log('✅ [VOTING SERVICE] Voto enviado com sucesso');
+      console.log('✅ [VOTING SERVICE] Voto inserido com sucesso no banco de dados!');
+      console.log('🎯 [VOTING SERVICE] CODVOTO gerado:', resultado.codVoto);
+      console.log('🗳️ [VOTING SERVICE] ===== PROCESSO DE VOTO CONCLUÍDO COM SUCESSO =====');
       
       return {
         success: true,

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { Calendar, Clock, Users, Vote, Settings, Plus, Edit, Trash2, Download, Eye, BarChart3, PieChart as PieChartIcon, Building2 } from "lucide-react";
+import { Calendar, Clock, Users, Vote, Settings, Plus, Edit, Trash2, Download, Eye, BarChart3, PieChart as PieChartIcon, Building2, Database, TestTube } from "lucide-react";
 import logoJurunense from "@/assets/logo-jurunense-desk.svg?url";
 import { votingService } from "@/services/votingService";
 
@@ -188,9 +188,47 @@ export default function Admin() {
   const [showNewCampaign, setShowNewCampaign] = useState(false);
   const [showNewSession, setShowNewSession] = useState(false);
   const [selectedFiliais, setSelectedFiliais] = useState<string[]>([]);
+  const [dbTestResult, setDbTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [dbTableResult, setDbTableResult] = useState<{ success: boolean; message: string; existe: boolean } | null>(null);
+  const [isTestingDb, setIsTestingDb] = useState(false);
   
   // Obtém estatísticas reais do service
   const estatisticasReais = votingService.obterEstatisticas();
+
+  const handleTestDatabase = async () => {
+    setIsTestingDb(true);
+    setDbTestResult(null);
+    
+    try {
+      const result = await votingService.testarConexaoBanco();
+      setDbTestResult(result);
+    } catch (error) {
+      setDbTestResult({
+        success: false,
+        message: 'Erro ao testar conexão com banco de dados'
+      });
+    } finally {
+      setIsTestingDb(false);
+    }
+  };
+
+  const handleCheckTable = async () => {
+    setIsTestingDb(true);
+    setDbTableResult(null);
+    
+    try {
+      const result = await votingService.verificarTabelaVotos();
+      setDbTableResult(result);
+    } catch (error) {
+      setDbTableResult({
+        success: false,
+        message: 'Erro ao verificar tabela',
+        existe: false
+      });
+    } finally {
+      setIsTestingDb(false);
+    }
+  };
 
   const handleLogin = () => {
     if (password === 'admin2025') {
@@ -332,7 +370,7 @@ export default function Admin() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-white border-jurunense-gray">
+          <TabsList className="grid w-full grid-cols-7 bg-white border-jurunense-gray">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-jurunense-primary data-[state=active]:text-white">
               Dashboard
             </TabsTrigger>
@@ -350,6 +388,9 @@ export default function Admin() {
             </TabsTrigger>
             <TabsTrigger value="reports" className="data-[state=active]:bg-jurunense-primary data-[state=active]:text-white">
               Relatórios
+            </TabsTrigger>
+            <TabsTrigger value="database" className="data-[state=active]:bg-jurunense-primary data-[state=active]:text-white">
+              Banco de Dados
             </TabsTrigger>
           </TabsList>
 
@@ -764,6 +805,157 @@ export default function Admin() {
                     <span className="font-semibold text-jurunense-primary">Ata de Apuração</span>
                     <span className="text-xs text-gray-600">Documento oficial</span>
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Banco de Dados */}
+          <TabsContent value="database" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-jurunense-primary">Teste de Banco de Dados</h2>
+              <Badge className="bg-jurunense-secondary text-white">
+                <Database className="w-4 h-4 mr-1" />
+                MSSQL Server
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Teste de Conexão */}
+              <Card className="bg-white border-jurunense-gray shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-jurunense-primary flex items-center">
+                    <TestTube className="w-5 h-5 mr-2" />
+                    Teste de Conexão
+                  </CardTitle>
+                  <CardDescription className="text-jurunense-secondary">
+                    Verifica se a conexão com o banco de dados está funcionando
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="text-sm text-gray-600 mb-2">Configuração do Banco:</div>
+                    <div className="text-xs text-gray-700 space-y-1">
+                      <div><strong>Servidor:</strong> 45.6.153.34:38000</div>
+                      <div><strong>Database:</strong> C6P3YB_167823_RM_PD</div>
+                      <div><strong>Usuário:</strong> CLT167823TI2</div>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    onClick={handleTestDatabase} 
+                    disabled={isTestingDb}
+                    className="w-full bg-jurunense-primary hover:bg-jurunense-primary/90"
+                  >
+                    {isTestingDb ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Testando...
+                      </>
+                    ) : (
+                      <>
+                        <TestTube className="w-4 h-4 mr-2" />
+                        Testar Conexão
+                      </>
+                    )}
+                  </Button>
+
+                  {dbTestResult && (
+                    <div className={`p-4 rounded-lg border ${
+                      dbTestResult.success 
+                        ? 'bg-green-50 border-green-200 text-green-800' 
+                        : 'bg-red-50 border-red-200 text-red-800'
+                    }`}>
+                      <div className="font-semibold mb-2">
+                        {dbTestResult.success ? '✅ Conexão Bem-sucedida' : '❌ Falha na Conexão'}
+                      </div>
+                      <div className="text-sm">{dbTestResult.message}</div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Verificação de Tabela */}
+              <Card className="bg-white border-jurunense-gray shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-jurunense-primary flex items-center">
+                    <Database className="w-5 h-5 mr-2" />
+                    Verificação de Tabela
+                  </CardTitle>
+                  <CardDescription className="text-jurunense-secondary">
+                    Verifica se a tabela VELEICAOVOTOMANUAL existe
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="text-sm text-gray-600 mb-2">Tabela de Votos:</div>
+                    <div className="text-xs text-gray-700">
+                      <div><strong>Nome:</strong> VELEICAOVOTOMANUAL</div>
+                      <div><strong>Finalidade:</strong> Armazenar votos manuais</div>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    onClick={handleCheckTable} 
+                    disabled={isTestingDb}
+                    className="w-full bg-jurunense-secondary hover:bg-jurunense-secondary/90"
+                  >
+                    {isTestingDb ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Verificando...
+                      </>
+                    ) : (
+                      <>
+                        <Database className="w-4 h-4 mr-2" />
+                        Verificar Tabela
+                      </>
+                    )}
+                  </Button>
+
+                  {dbTableResult && (
+                    <div className={`p-4 rounded-lg border ${
+                      dbTableResult.success 
+                        ? 'bg-green-50 border-green-200 text-green-800' 
+                        : 'bg-red-50 border-red-200 text-red-800'
+                    }`}>
+                      <div className="font-semibold mb-2">
+                        {dbTableResult.existe ? '✅ Tabela Encontrada' : '❌ Tabela Não Encontrada'}
+                      </div>
+                      <div className="text-sm">{dbTableResult.message}</div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Informações de Debug */}
+            <Card className="bg-white border-jurunense-gray shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-jurunense-primary">Informações de Debug</CardTitle>
+                <CardDescription className="text-jurunense-secondary">
+                  Logs detalhados do processo de votação
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="font-semibold text-blue-800 mb-2">📋 Instruções:</div>
+                    <div className="text-sm text-blue-700 space-y-1">
+                      <div>• Abra o Console do navegador (F12) para ver logs detalhados</div>
+                      <div>• Todos os processos de votação são logados com emojis para fácil identificação</div>
+                      <div>• Logs incluem: conexão, busca de candidatos, inserção de votos</div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="font-semibold text-yellow-800 mb-2">⚠️ Importante:</div>
+                    <div className="text-sm text-yellow-700 space-y-1">
+                      <div>• O sistema agora insere votos diretamente no banco MSSQL</div>
+                      <div>• Cada voto gera um CODVOTO único automaticamente</div>
+                      <div>• A tabela VELEICAOVOTOMANUAL deve existir no banco</div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
